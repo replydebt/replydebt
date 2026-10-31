@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!-- Source template for assets/img/og-image.png (1200x627). Render via: node tools/make-og.mjs -->
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>Reply Debt OpenGraph Preview</title>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <style>
+    html, body { width: 1200px; height: 627px; overflow: hidden; margin: 0; }
+    body {
+      background: var(--bg);
+      display: grid;
+      grid-template-columns: 610px 1fr;
+      gap: 36px;
+      padding: 76px 52px 0 64px;
+      box-sizing: border-box;
+    }
+    .og-brand { display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 700; color: #2c365d; }
+    .og-note { margin-top: 8px; font-size: 14px; color: var(--text-low); }
+    .og-title { margin-top: 30px; font-size: 52px; line-height: 1.13; font-weight: 400; color: #2c365d; letter-spacing: -0.6px; }
+    .og-sub { margin-top: 20px; font-size: 22px; line-height: 1.42; color: var(--text-low); }
+    .og-pills { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+    .og-pills span {
+      display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px;
+      border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-card);
+      font-size: 16px; font-weight: 600; color: var(--text);
+    }
+    .og-pills svg { color: var(--success); }
+    .og-stack { padding-top: 28px; }
+    .og-stack .card { width: 468px; }
+    .og-badge {
+      display: inline-block; margin-left: 6px; min-width: 22px; height: 22px; border-radius: 11px;
+      background: var(--badge); color: var(--on-accent); font-size: 14px; font-weight: 600;
+      text-align: center; line-height: 22px; padding: 0 6px; vertical-align: 2px;
+    }
+    .og-avatar { width: 48px; height: 48px; }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="og-brand">
+      <svg viewBox="0 0 34 34" width="46" height="46" aria-hidden="true">
+        <rect width="34" height="34" rx="5" fill="#2c365d"/>
+        <path d="M11 22.5L17 11.5L23 22.5Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/>
+        <g fill="#fff">
+          <circle cx="17" cy="11.5" r="3.6"/>
+          <circle cx="11" cy="22.5" r="3.6"/>
+          <circle cx="23" cy="22.5" r="3.6"/>
+        </g>
+      </svg>
+      <span>Reply Debt</span>
+    </div>
+    <p class="og-note">Independent open-source tool · Not affiliated with LinkedIn</p>
+    <h1 class="og-title">Find the recruiters and colleagues you forgot to answer</h1>
+    <p class="og-sub">Open your official LinkedIn data archive locally in your browser. Four clear action lists in seconds.</p>
+    <div class="og-pills">
+      <span><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18 10V7A6 6 0 006 7v3H4v12h16V10zM8 7a4 4 0 018 0v3H8z"/></svg>Zero uploads</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Memory-only default</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>MIT Open Source</span>
+    </div>
+  </div>
+
+  <div class="og-stack">
+    <section class="card">
+      <header class="card__header">
+        <div class="card__titles">
+          <h3 class="card__title">Waiting for your reply <span class="og-badge">7</span></h3>
+        </div>
+      </header>
+      <div class="list">
+        <div class="row">
+          <div class="avatar og-avatar"><svg viewBox="0 0 48 48"><rect width="48" height="48" class="ghost__bg"/><circle cx="24" cy="19" r="8.5" class="ghost__fg"/><path d="M7 48c0-10 7.6-16.5 17-16.5S41 38 41 48z" class="ghost__fg"/></svg></div>
+          <div class="row__main">
+            <div class="row__name">Emma Collins</div>
+            <div class="row__headline">Product Manager at Lumen Labs</div>
+            <div class="row__meta">Asked you a question · 3w</div>
+            <div class="row__quote">Are you still planning to speak at the meetup?</div>
+          </div>
+          <div class="row__actions"><span class="btn btn--secondary btn--sm">Reply</span></div>
+        </div>
+        <div class="row">
+          <div class="avatar og-avatar"><svg viewBox="0 0 48 48"><rect width="48" height="48" class="ghost__bg"/><circle cx="24" cy="19" r="8.5" class="ghost__fg"/><path d="M7 48c0-10 7.6-16.5 17-16.5S41 38 41 48z" class="ghost__fg"/></svg></div>
+          <div class="row__main">
+            <div class="row__name">Selin Aydin</div>
+            <div class="row__headline">Talent Partner at Vela Payments</div>
+            <div class="row__meta"><span class="tag">Recruiter</span> Never answered · 8mo</div>
+          </div>
+          <div class="row__actions"><span class="btn btn--secondary btn--sm">Reply</span></div>
+        </div>
+        <div class="row">
+          <div class="avatar og-avatar"><svg viewBox="0 0 48 48"><rect width="48" height="48" class="ghost__bg"/><circle cx="24" cy="19" r="8.5" class="ghost__fg"/><path d="M7 48c0-10 7.6-16.5 17-16.5S41 38 41 48z" class="ghost__fg"/></svg></div>
+          <div class="row__main">
+            <div class="row__name">Daniel Kim</div>
+            <div class="row__headline">Frontend Developer at Fieldstone</div>
+            <div class="row__meta">Asked you a question · 2mo</div>
+          </div>
+          <div class="row__actions"><span class="btn btn--secondary btn--sm">Reply</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

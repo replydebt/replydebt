@@ -1,0 +1,8 @@
+# Personal LinkedIn archives and raw CSV exports must never be committed
+*LinkedInDataExport*
+*.zip
+!tests/fixtures/Basic_LinkedInDataExport_sample.zip
+*.csv
+node_modules/
+screenshots/
+dist/

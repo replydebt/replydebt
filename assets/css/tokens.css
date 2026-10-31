@@ -1,0 +1,90 @@
+/* Design tokens: familiar 3-column layout, warm neutral canvas, and WCAG AA dark-mode contrast. */
+:root {
+  --font: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans",
+    Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Lucida Grande", Helvetica, Arial, sans-serif;
+
+  --brand: #2c365d;
+  --bg: #f4f2ee;
+  --surface: #ffffff;
+  --surface-2: #f4f2ee;
+  --surface-hover: rgba(0, 0, 0, 0.04);
+  --surface-press: rgba(0, 0, 0, 0.08);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --divider: rgba(140, 140, 140, 0.2);
+
+  --text: rgba(0, 0, 0, 0.9);
+  --text-low: rgba(0, 0, 0, 0.62);
+  --text-disabled: rgba(0, 0, 0, 0.38);
+  --on-accent: #ffffff;
+
+  --action: #0a66c2;
+  --action-hover: #004182;
+  --action-press: #09223b;
+  --action-tint: rgba(112, 181, 249, 0.2);
+  --action-tint-hover: rgba(112, 181, 249, 0.1);
+  --selected: #01754f;
+  --selected-hover: #01593d;
+  --badge: #cb112d;
+  --success: #057642;
+  --guest-heading: #2c365d;
+  --input-bg: #edf3f8;
+  --cover-1: #a0b4b7;
+  --cover-2: #c6d1d3;
+  --cover-3: #b7c4d6;
+  --cover-4: #d6cdbf;
+  --cover-5: #bfcdbb;
+  --ghost-bg: #e9e5df;
+  --ghost-fg: #a6a19a;
+
+  --shadow-card: 0 0 0 1px rgba(140, 140, 140, 0.2);
+  --shadow-raised: 0 0 0 1px rgba(140, 140, 140, 0.2), 0 4px 12px rgba(0, 0, 0, 0.18);
+  --shadow-overlay: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(140, 140, 140, 0.2);
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--action);
+
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-pill: 24px;
+  --nav-h: 52px;
+  --bnav-h: 56px;
+  --page: 1128px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 167ms;
+}
+
+[data-theme="dark"] {
+  --brand: #aebcf0;
+  --bg: #000000;
+  --surface: #1b1f23;
+  --surface-2: #2a2e33;
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --surface-press: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --divider: rgba(255, 255, 255, 0.12);
+  --text: rgba(255, 255, 255, 0.92);
+  --text-low: rgba(255, 255, 255, 0.68);
+  --text-disabled: rgba(255, 255, 255, 0.42);
+  --on-accent: #0b141a;
+  --action: #71b7fb;
+  --action-hover: #a8d4ff;
+  --action-press: #c7e3ff;
+  --action-tint: rgba(113, 183, 251, 0.18);
+  --action-tint-hover: rgba(113, 183, 251, 0.1);
+  --selected: #4dbb8a;
+  --selected-hover: #6fd1a4;
+  --badge: #f5987e;
+  --success: #6dc993;
+  --guest-heading: #c3d0f5;
+  --input-bg: #38434f;
+  --cover-1: #3c4a4d;
+  --cover-2: #3e4a52;
+  --cover-3: #36414f;
+  --cover-4: #4a443b;
+  --cover-5: #3b4639;
+  --ghost-bg: #38434f;
+  --ghost-fg: #8c96a0;
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --shadow-raised: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 6px 16px rgba(0, 0, 0, 0.55);
+  --shadow-overlay: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
