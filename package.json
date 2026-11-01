@@ -1,15 +1,15 @@
 {
-  "name": "reply-debt",
+  "name": "network-audit",
   "version": "1.0.0",
   "license": "MIT",
   "author": "Nayri Akbuğa",
   "type": "module",
-  "description": "See who is still waiting to hear from you on LinkedIn. Zero-dependency, in-browser reader for your official LinkedIn data archive.",
+  "description": "Audit unanswered LinkedIn messages, missed recruiters, hidden credibility scores, and warm company paths locally in your browser.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/replydebt/replydebt.github.io.git"
+    "url": "https://github.com/networkaudit/networkaudit.github.io.git"
   },
-  "homepage": "https://replydebt.github.io",
+  "homepage": "https://networkaudit.github.io",
   "engines": {
     "node": ">=20.0.0"
   },

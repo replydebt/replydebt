@@ -1,4 +1,4 @@
-// Global navigation bar: distinct Reply Debt mark + company search + primary tabs + Me menu.
+// Global navigation bar: distinct Network Audit mark + company search + primary tabs + Me menu.
 import { AFFILIATION_NOTICE, PRODUCT_NAME, REPO_URL } from '../config.js';
 import { h, isMobileViewport } from './h.js';
 import { icon, logo } from './icons.js';

@@ -2,7 +2,7 @@
 
 ## Architecture & Scope
 
-Reply Debt is a zero-dependency, client-side static web application. It has no application server, database, authentication system, or backend API. User archives are parsed locally inside the user's browser tab (`Web Worker` + `DecompressionStream`).
+Network Audit is a zero-dependency, client-side static web application. It has no application server, database, authentication system, or backend API. User archives are parsed locally inside the user's browser tab (`Web Worker` + `DecompressionStream`).
 
 Key browser-enforced controls in scope for security review:
 
@@ -20,7 +20,7 @@ Key browser-enforced controls in scope for security review:
 
 Please report security vulnerabilities privately through GitHub's Private Vulnerability Reporting:
 
-- **Report URL:** https://github.com/replydebt/replydebt.github.io/security/advisories/new
+- **Report URL:** https://github.com/networkaudit/networkaudit.github.io/security/advisories/new
 
 Please do not open a public GitHub issue for undisclosed security vulnerabilities. Include a minimal proof-of-concept (for example, a synthetic `.zip` or `.csv` fixture containing no real personal data) and browser version details so the issue can be reproduced quickly.
 

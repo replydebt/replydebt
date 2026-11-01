@@ -5,7 +5,7 @@ try {
   document.documentElement.setAttribute('data-framed', '1');
 }
 try {
-  var saved = localStorage.getItem('rd.theme');
+  var saved = localStorage.getItem('na.theme');
   var theme = saved === 'dark' || saved === 'light'
     ? saved
     : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');

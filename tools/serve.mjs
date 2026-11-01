@@ -97,5 +97,5 @@ if (isCli) {
   const port = portIdx > 0 ? Number(process.argv[portIdx + 1]) : Number(process.env.PORT || 8080);
   const rootDir = dirIdx > 0 ? path.resolve(process.argv[dirIdx + 1]) : root;
   const srv = await createStaticServer({ rootDir, port });
-  console.log(`Reply Debt local server listening at ${srv.url}`);
+  console.log(`Network Audit local server listening at ${srv.url}`);
 }

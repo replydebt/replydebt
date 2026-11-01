@@ -1,7 +1,7 @@
 // Optional IndexedDB key-value store for opted-in action lists (never raw messages or emails).
 import { DB_NAME } from '../config.js';
 
-const LEGACY_DB_NAME = 'network-xray';
+const LEGACY_DB_NAMES = ['reply-debt', 'network-xray'];
 const STORE = 'kv';
 let dbPromise = null;
 
@@ -75,6 +75,6 @@ export const store = {
       if (dbPromise) (await dbPromise).close();
     } catch { /* ignore */ }
     dbPromise = null;
-    await Promise.all([deleteDb(DB_NAME), deleteDb(LEGACY_DB_NAME)]);
+    await Promise.all([deleteDb(DB_NAME), ...LEGACY_DB_NAMES.map(deleteDb)]);
   },
 };

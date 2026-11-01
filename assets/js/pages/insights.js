@@ -85,7 +85,7 @@ function renderCredibilityCard(cred, isComplete) {
           'p.t-14.t-low',
           isComplete
             ? 'LinkedIn did not include Inferred Credibility Scores.csv in this archive.'
-            : 'Your fast 10-minute archive covers all four action lists plus social capital. If you later request LinkedIn\'s Complete archive ("Download larger data archive"), Reply Debt also decodes Inferred Credibility Scores.csv — showing your hidden Notability tier, 5-pillar specialty grades, and 100+ topic authority trends.',
+            : 'Your fast 10-minute archive covers all four action lists plus social capital. If you later request LinkedIn\'s Complete archive ("Download larger data archive"), Network Audit also decodes Inferred Credibility Scores.csv — showing your hidden Notability tier, 5-pillar specialty grades, and 100+ topic authority trends.',
         ),
       ),
     );

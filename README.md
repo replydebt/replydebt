@@ -1,13 +1,13 @@
-# Reply Debt
+# Network Audit
 
-**Reply Debt** (<https://replydebt.github.io>) is a client-side, zero-dependency browser utility that reads an official LinkedIn data export (`.zip` or `.csv`) locally on your device and organizes it into four actionable lists:
+**Network Audit** (<https://networkaudit.github.io>) is a client-side, zero-dependency browser utility that reads an official LinkedIn data export (`.zip` or `.csv`) locally on your device and organizes it into four actionable lists:
 
 1. **Replies** — 1:1 conversations where the other person wrote last or asked an unanswered question (filtering out short sign-offs, group chats, sales pitches, and threads answered in a newer conversation).
 2. **Recruiters** — Inbound recruiter outreach across messages, InMails, and invitation notes, deduplicated per person with editable reply templates.
 3. **Reconnect** — Five connections per week with real two-way message history and social-capital trust signals who have gone quiet for over six months.
 4. **Companies** — Connections grouped by normalized employer (plus a **Following** filter for followed/dream target companies) and ranked by two-way conversation warmth, recommendations, endorsements, and shared-employer alumni history.
 
-When you open LinkedIn's full 24–48h **Complete Data Archive** (or full Basic archive), Reply Debt also unlocks **`#/insights` (Archive & Algorithm Insights)**:
+When you open LinkedIn's full 24–48h **Complete Data Archive** (or full Basic archive), Network Audit also unlocks **`#/insights` (Archive & Algorithm Insights)**:
 - **Topic Credibility & 5-Pillar Authority (`Inferred Credibility Scores.csv`):** Decodes your discrete Notability Tier (`0–4`), continuous Notability Score (`0–5`), 5-pillar specialty grades (`Role & scope`, `Tenure`, `Content output`, `Credentials`, `Validation`), and `100+` normalized feed topic scores (`1.00–4.00`) with historical trend deltas.
 - **Algorithmic Inferences & Ad Persona (`Inferences_about_you.csv`, `Ad_Targeting.csv`, `Skills.csv`):** Reveals how LinkedIn's ad and ranking engines classify your seniority, job functions, and high-value buyer segments while structurally excluding personal demographic categories (`Member Age`, `Member Gender`, `Inferred personal characteristics`).
 - **Social Capital & Outbound Invitation Hygiene:** Surfaces endorsement/recommendation depth, shared-company alumni counts, followed companies already inside your 1st-degree network, and stale unaccepted outgoing invitations (`> 90 days`).
@@ -15,7 +15,7 @@ When you open LinkedIn's full 24–48h **Complete Data Archive** (or full Basic 
 - **Quarantined Sensitive Files (Never Decompressed or Read):** `Email Addresses.csv`, `PhoneNumbers.csv`, `Whatsapp Phone Numbers.csv`, `Receipts_v2.csv`, `Verifications.csv`, `Logins.csv`, `Security Challenges.csv`, `Registration.csv`, and `Notes.csv` are automatically quarantined and never read into memory.
 
 > **Independent open-source tool · Not affiliated with LinkedIn.**
-> Reply Debt is not affiliated with, endorsed by, or sponsored by LinkedIn Corporation.
+> Network Audit is not affiliated with, endorsed by, or sponsored by LinkedIn Corporation.
 
 ---
 

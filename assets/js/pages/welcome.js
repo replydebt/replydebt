@@ -312,11 +312,11 @@ export function renderWelcome(root, api) {
     if (back && Date.now() - ui.requestedAt > TEN_MIN) heroTitle.textContent = 'Welcome back. Your archive should be ready.';
     heroSub.textContent = back
       ? 'Download the .zip file from LinkedIn\'s email and open it locally below. Results appear in seconds.'
-      : 'Your official LinkedIn data archive knows who is still waiting on your reply, which recruiters reached out, and who can introduce you at a target company. Reply Debt turns it into a local action list.';
+      : `Your official LinkedIn data archive knows who is still waiting on your reply, which recruiters reached out, and who can introduce you at a target company. ${PRODUCT_NAME} turns it into a local action list.`;
     mobileNoteHost.replaceChildren(...[mobileCallout()].filter(Boolean));
     stepsHost.replaceChildren(h('ol.steps__list', step1(), step2(), step3()));
     if (ui.watching) updateWatchStatus();
-    if (!ui.watching) setTab(back ? `Waiting for your archive | ${PRODUCT_NAME}` : `${PRODUCT_NAME}: LinkedIn Archive Reply & Recruiter Finder`);
+    if (!ui.watching) setTab(back ? `Waiting for your archive | ${PRODUCT_NAME}` : `${PRODUCT_NAME}: Local LinkedIn Archive & Signal Analyzer`);
   }
 
   // ---------- Page ----------
@@ -366,10 +366,10 @@ export function renderWelcome(root, api) {
     h(
       'div.faq__inner',
       h('h2.band__title', 'Privacy and frequently asked questions'),
-      faqItem('Is my LinkedIn archive uploaded to any server?', 'No. Reply Debt parses your official LinkedIn .zip or .csv export 100% locally inside your browser tab using Web Workers and browser-native DecompressionStream. Strict Content Security Policy (connect-src \'none\') blocks outbound data transfers, and you can turn off Wi-Fi before opening your archive.'),
+      faqItem('Is my LinkedIn archive uploaded to any server?', `No. ${PRODUCT_NAME} parses your official LinkedIn .zip or .csv export 100% locally inside your browser tab using Web Workers and browser-native DecompressionStream. Strict Content Security Policy (connect-src 'none') blocks outbound data transfers, and you can turn off Wi-Fi before opening your archive.`),
       faqItem('Is anything stored in my browser by default?', 'No. Memory-only (RAM) mode is the default, so everything disappears when you close or refresh the tab. Before opening a file, you can optionally choose to save your minimized action lists locally for 90 days. Even when opted in, raw message bodies, InMail subjects, invitation notes, and email addresses are never written to IndexedDB or localStorage.'),
-      faqItem('How do I export the fast LinkedIn data archive without waiting 24 hours?', 'Open LinkedIn\'s Download your data settings page, choose "Want something in particular?", select Connections, Messages, Invitations, and Profile, and request your archive. LinkedIn emails the fast export in roughly 10 minutes — you do not need to wait for the second 24-hour email. If you also download LinkedIn\'s Complete 24-48 hour archive, Reply Debt automatically unlocks your hidden Topic Credibility scores, algorithmic inferences, social capital signals, and activity insights while quarantining sensitive email, phone, billing, and login-IP files.'),
-      faqItem('Is Reply Debt affiliated with LinkedIn?', `No. Reply Debt is an independent, MIT-licensed open-source tool published by ${PUBLISHER_NAME} and is not affiliated with, endorsed by, or sponsored by LinkedIn Corporation.`),
+      faqItem('How do I export the fast LinkedIn data archive without waiting 24 hours?', `Open LinkedIn's Download your data settings page, choose "Want something in particular?", select Connections, Messages, Invitations, and Profile, and request your archive. LinkedIn emails the fast export in roughly 10 minutes — you do not need to wait for the second 24-hour email. If you also download LinkedIn's Complete 24-48 hour archive, ${PRODUCT_NAME} automatically unlocks your hidden Topic Credibility scores, algorithmic inferences, social capital signals, and activity insights while quarantining sensitive email, phone, billing, and login-IP files.`),
+      faqItem(`Is ${PRODUCT_NAME} affiliated with LinkedIn?`, `No. ${PRODUCT_NAME} is an independent, MIT-licensed open-source tool published by ${PUBLISHER_NAME} and is not affiliated with, endorsed by, or sponsored by LinkedIn Corporation.`),
     ),
   );
 

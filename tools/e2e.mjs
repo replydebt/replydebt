@@ -157,7 +157,7 @@ const DUMP_STORAGE_EXPR = `(async () => {
   const ls = {};
   for (const k of Object.keys(localStorage)) ls[k] = localStorage.getItem(k);
   const idb = await new Promise((resolve) => {
-    const req = indexedDB.open('reply-debt', 1);
+    const req = indexedDB.open('network-audit', 1);
     req.onupgradeneeded = () => { req.result.createObjectStore('kv'); };
     req.onerror = () => resolve({});
     req.onsuccess = () => {
@@ -378,8 +378,8 @@ try {
   await viewport(1440, 900);
   await go(BASE);
   await waitFor('document.querySelector(".hero__title")');
-  check('welcome renders Reply Debt brand & affiliation notice', await evaluate(
-    'document.title.includes("Reply Debt") && document.body.textContent.includes("Independent open-source tool")',
+  check('welcome renders Network Audit brand & affiliation notice', await evaluate(
+    'document.title.includes("Network Audit") && document.body.textContent.includes("Independent open-source tool")',
   ));
 
   await clickText('button', 'About');
@@ -390,7 +390,7 @@ try {
   await evaluate('document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))');
   check('ESC closes modal cleanly', !(await evaluate('Boolean(document.querySelector(".modal"))')));
 
-  await evaluate(`localStorage.setItem('rd.handoff', JSON.stringify({ requestedAt: Date.now() - 12 * 60000 }))`);
+  await evaluate(`localStorage.setItem('na.handoff', JSON.stringify({ requestedAt: Date.now() - 12 * 60000 }))`);
   await go(BASE);
   await waitFor('document.querySelector(".step--done")');
   check('return memory shows Downloads-first step 2 & LinkedIn downloads link', await evaluate(
@@ -474,7 +474,7 @@ try {
   await go(`${BASE}?reset=1`);
   await waitFor('document.querySelector(".modal")');
   check('?reset=1 asks for confirmation before deleting saved data', await evaluate(
-    'document.querySelector(".modal__title").textContent.includes("Clear saved Reply Debt data")',
+    'document.querySelector(".modal__title").textContent.includes("Clear saved Network Audit data")',
   ));
   await clickText('.modal__footer .btn--secondary', 'Cancel');
   check('canceling ?reset=1 preserves saved archive', (await evaluate('document.querySelector(".profile-card__name").textContent')) === 'Casey Rivera');
@@ -565,11 +565,11 @@ try {
       welcomeLayout.issues.join('; ') || `${welcomeLayout.controlCount} header controls, scrollW=${welcomeLayout.scrollW}`,
     );
 
-    await evaluate(`localStorage.setItem('rd.handoff', JSON.stringify({ requestedAt: Date.now() - 12 * 60000 }))`);
+    await evaluate(`localStorage.setItem('na.handoff', JSON.stringify({ requestedAt: Date.now() - 12 * 60000 }))`);
     await go(BASE);
     await waitFor('document.querySelector(".step--done")');
     const handoffLayout = await evaluate(expr);
-    await evaluate(`localStorage.removeItem('rd.handoff')`);
+    await evaluate(`localStorage.removeItem('na.handoff')`);
     check(
       `mobile ${mw}x${mh} Welcome return-memory Step 2: buttons unclipped & scrollWidth <= innerWidth`,
       handoffLayout.ok,
@@ -953,8 +953,8 @@ try {
     const [rt, st] = await Promise.all([r.text(), s.text()]);
     const seoEndpointsOk = r.status === 200 && s.status === 200
       && (s.headers.get('content-type') || '').includes('xml')
-      && rt.includes('Sitemap: https://replydebt.github.io/sitemap.xml')
-      && st.includes('<loc>https://replydebt.github.io/</loc>');
+      && rt.includes('Sitemap: https://networkaudit.github.io/sitemap.xml')
+      && st.includes('<loc>https://networkaudit.github.io/</loc>');
     check('robots.txt and sitemap.xml serve with HTTP 200, XML content-type, and canonical URLs', seoEndpointsOk);
   }
 
@@ -985,9 +985,9 @@ try {
   check('nested missing route (/nested/missing/page) loads styled 404 under strict CSP with zero broken assets', await evaluate(
     'document.body.textContent.includes("Page not found") && getComputedStyle(document.querySelector(".frame-guard")).display === "flex" && document.querySelector("img")?.naturalWidth > 0',
   ));
-  await clickText('a.btn--primary', 'Go to Reply Debt');
+  await clickText('a.btn--primary', 'Go to Network Audit');
   await waitFor('document.querySelector(".hero__title")');
-  check('nested 404 "Go to Reply Debt" link navigates cleanly back to root app', await evaluate(
+  check('nested 404 "Go to Network Audit" link navigates cleanly back to root app', await evaluate(
     'location.pathname === "/" && Boolean(document.querySelector(".hero__title"))',
   ));
 
@@ -1037,8 +1037,8 @@ try {
   await click('.gnav__share');
   await waitFor('document.querySelector(".modal textarea")');
   const shareVal = await evaluate('document.querySelector(".modal textarea").value');
-  check('file:// share text uses public https://replydebt.github.io/ URL and never leaks local disk path', (
-    shareVal.includes('https://replydebt.github.io/') && !shareVal.includes('file:') && !shareVal.includes('null/')
+  check('file:// share text uses public https://networkaudit.github.io/ URL and never leaks local disk path', (
+    shareVal.includes('https://networkaudit.github.io/') && !shareVal.includes('file:') && !shareVal.includes('null/')
   ));
 
   check('zero JS exceptions, console errors, CSP violations, or external requests across entire run', errors.length === 0, errors.slice(0, 3).join(' | '));

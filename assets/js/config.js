@@ -1,9 +1,9 @@
 // Central product, origin, privacy, and optional cookieless analytics configuration.
 
-export const PRODUCT_NAME = 'Reply Debt';
-export const SITE_ORIGIN = 'https://replydebt.github.io';
-export const REPO_URL = 'https://github.com/replydebt/replydebt.github.io';
-export const SECURITY_ADVISORY_URL = 'https://github.com/replydebt/replydebt.github.io/security/advisories/new';
+export const PRODUCT_NAME = 'Network Audit';
+export const SITE_ORIGIN = 'https://networkaudit.github.io';
+export const REPO_URL = 'https://github.com/networkaudit/networkaudit.github.io';
+export const SECURITY_ADVISORY_URL = 'https://github.com/networkaudit/networkaudit.github.io/security/advisories/new';
 export const PUBLISHER_NAME = 'Nayri Akbuğa';
 export const AFFILIATION_NOTICE = 'Independent open-source tool · Not affiliated with LinkedIn';
 
@@ -16,8 +16,8 @@ export const BRAND_COLOR = '#2c365d';
 export const ANALYTICS_ENDPOINT = '';
 
 export const RETENTION_DAYS = 90;
-export const DB_NAME = 'reply-debt';
-export const STORAGE_PREFIX = 'rd.';
+export const DB_NAME = 'network-audit';
+export const STORAGE_PREFIX = 'na.';
 
 export function analyticsOrigin(endpoint = ANALYTICS_ENDPOINT) {
   if (!endpoint) return '';
@@ -45,7 +45,7 @@ export function buildNoscriptPixelHtml(endpoint = ANALYTICS_ENDPOINT) {
 export function buildPrivacyAnalyticsHtml(endpoint = ANALYTICS_ENDPOINT) {
   const origin = analyticsOrigin(endpoint);
   if (!origin) {
-    return '<li id="visit-analytics-disclosure"><strong>Visit Analytics:</strong> Disabled at launch (<code>ANALYTICS_ENDPOINT = \'\'</code>). Reply Debt sets zero cookies, loads zero third-party scripts, and sends zero analytics beacons.</li>';
+    return `<li id="visit-analytics-disclosure"><strong>Visit Analytics:</strong> Disabled at launch (<code>ANALYTICS_ENDPOINT = ''</code>). ${PRODUCT_NAME} sets zero cookies, loads zero third-party scripts, and sends zero analytics beacons.</li>`;
   }
   return `<li id="visit-analytics-disclosure"><strong>Visit Analytics:</strong> Minimal cookieless 1x1 page-load pixel via <code>${escapeHtml(origin)}</code> (<code>referrerpolicy="no-referrer"</code>, zero cookies, zero localStorage, zero archive or contact metadata, skipped when Do Not Track or Global Privacy Control is enabled).</li>`;
 }

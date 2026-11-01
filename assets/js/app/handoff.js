@@ -182,7 +182,7 @@ export function downloadReminderIcs(url = publicAppUrl(), minutes = 15) {
   const esc = (s) => s.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
   const ics = [
     'BEGIN:VCALENDAR', 'VERSION:2.0', `PRODID:-//${PRODUCT_NAME}//EN`, 'BEGIN:VEVENT',
-    `UID:${start}-rd@replydebt.github.io`, `DTSTAMP:${icsDate(Date.now())}`, `DTSTART:${icsDate(start)}`, `DTEND:${icsDate(end)}`,
+    `UID:${start}-na@networkaudit.github.io`, `DTSTAMP:${icsDate(Date.now())}`, `DTSTART:${icsDate(start)}`, `DTEND:${icsDate(end)}`,
     `SUMMARY:${esc(title)}`, `DESCRIPTION:${esc(details)}`, `URL:${url}`, `LOCATION:${esc(url)}`,
     'BEGIN:VALARM', 'TRIGGER:-PT0M', 'ACTION:DISPLAY', `DESCRIPTION:${esc(title)}`, 'END:VALARM',
     'END:VEVENT', 'END:VCALENDAR',
@@ -190,7 +190,7 @@ export function downloadReminderIcs(url = publicAppUrl(), minutes = 15) {
   const blobUrl = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
   const a = document.createElement('a');
   a.href = blobUrl;
-  a.download = 'reply-debt-reminder.ics';
+  a.download = 'network-audit-reminder.ics';
   document.body.appendChild(a);
   a.click();
   a.remove();

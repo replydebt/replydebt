@@ -537,15 +537,15 @@ test('seo: robots.txt and sitemap.xml pass crawler directives, canonical URLs, a
   const robots = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
   assert.match(robots, /^User-agent:\s*\*$/m);
   assert.match(robots, /^Allow:\s*\/$/m);
-  assert.match(robots, /^Sitemap:\s*https:\/\/replydebt\.github\.io\/sitemap\.xml$/m);
+  assert.match(robots, /^Sitemap:\s*https:\/\/networkaudit\.github\.io\/sitemap\.xml$/m);
 
   const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
   assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
   assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
   const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
   assert.deepEqual(locs, [
-    'https://replydebt.github.io/',
-    'https://replydebt.github.io/privacy.html',
+    'https://networkaudit.github.io/',
+    'https://networkaudit.github.io/privacy.html',
   ]);
   assert.equal(sitemap.includes('404.html'), false, 'noindex 404.html must never appear in sitemap.xml');
   const lastmods = [...sitemap.matchAll(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)];
@@ -574,8 +574,8 @@ test('seo: index.html, privacy.html, and 404.html pass Semrush, Ahrefs, and Ligh
   assert.ok(touchPng.byteLength < 32 * 1024, 'apple-touch-icon.png should stay lightweight (<32 KB)');
 
   const indexablePages = [
-    { file: 'index.html', html: indexHtml, canonical: 'https://replydebt.github.io/', minWords: 250 },
-    { file: 'privacy.html', html: privacyHtml, canonical: 'https://replydebt.github.io/privacy.html', minWords: 400 },
+    { file: 'index.html', html: indexHtml, canonical: 'https://networkaudit.github.io/', minWords: 250 },
+    { file: 'privacy.html', html: privacyHtml, canonical: 'https://networkaudit.github.io/privacy.html', minWords: 400 },
   ];
 
   const titles = new Set();
@@ -657,7 +657,7 @@ test('seo: index.html, privacy.html, and 404.html pass Semrush, Ahrefs, and Ligh
   // Image CLS & alt audit + PNG apple-touch-icon + canonical root trailing slash + internal asset existence + external rel="noopener noreferrer" across all HTML pages
   for (const [file, html] of [['index.html', indexHtml], ['privacy.html', privacyHtml], ['404.html', notFoundHtml]]) {
     assert.match(html, /<link\s+rel="apple-touch-icon"\s+sizes="180x180"\s+href="\/?assets\/img\/apple-touch-icon\.png">/i, `${file} must point apple-touch-icon to 180x180 PNG`);
-    assert.equal(html.includes('href="https://replydebt.github.io"'), false, `${file} must use canonical trailing-slash https://replydebt.github.io/`);
+    assert.equal(html.includes('href="https://networkaudit.github.io"'), false, `${file} must use canonical trailing-slash https://networkaudit.github.io/`);
     for (const imgMatch of html.matchAll(/<img\b([^>]*)>/gi)) {
       const attrs = imgMatch[1];
       assert.match(attrs, /\balt="[^"]+"/i, `${file} <img> must have non-empty alt text`);

@@ -106,7 +106,7 @@ export function quotesNoticeBanner(actions) {
     h(
       'div.banner__text',
       h('p.banner__title', 'Saved action list (message text omitted for privacy)'),
-      h('p.t-low', 'Reply Debt never writes message bodies, InMail subjects, or invitation notes to browser storage. Reopen your .zip anytime to view message quotes in memory.'),
+      h('p.t-low', 'Network Audit never writes message bodies, InMail subjects, or invitation notes to browser storage. Reopen your .zip anytime to view message quotes in memory.'),
       h(
         'div.banner__actions',
         h('button.btn.btn--secondary.btn--sm', { type: 'button', onclick: actions.openArchive }, 'Reopen .zip to view quotes'),

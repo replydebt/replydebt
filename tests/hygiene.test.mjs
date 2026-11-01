@@ -166,7 +166,7 @@ test('hygiene: .well-known/security.txt complies with RFC 9116 and dist/ strictl
   const secTxt = fs.readFileSync(path.join(root, '.well-known', 'security.txt'), 'utf8');
   assert.match(secTxt, /^Contact:\s*https:\/\//m);
   assert.match(secTxt, /^Policy:\s*https:\/\//m);
-  assert.match(secTxt, /^Canonical:\s*https:\/\/replydebt\.github\.io\/\.well-known\/security\.txt$/m);
+  assert.match(secTxt, /^Canonical:\s*https:\/\/networkaudit\.github\.io\/\.well-known\/security\.txt$/m);
   const expMatch = secTxt.match(/^Expires:\s*(\S+)$/m);
   assert.ok(expMatch, 'security.txt missing Expires field');
   const expiresAt = Date.parse(expMatch[1]);

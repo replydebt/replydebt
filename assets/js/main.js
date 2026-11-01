@@ -47,7 +47,7 @@ if (document.documentElement.dataset.framed === '1') {
         'section.card.frame-guard__card',
         icon('shield', 32),
         h('h1.card__title', `${PRODUCT_NAME} cannot run inside an embedded frame`),
-        h('p.t-14.t-low', 'To protect your LinkedIn archive from clickjacking or surrounding page overlays, open Reply Debt directly in its own browser tab.'),
+        h('p.t-14.t-low', `To protect your LinkedIn archive from clickjacking or surrounding page overlays, open ${PRODUCT_NAME} directly in its own browser tab.`),
         h('a.btn.btn--primary', { href: topHref, target: '_top', rel: 'noopener noreferrer' }, `Open ${PRODUCT_NAME} in a new tab`, icon('external', 16)),
       ),
     ),
@@ -514,7 +514,7 @@ function startApp() {
     const m = openModal({
       title: 'Which participant is you?',
       body: [
-        h('p.t-14.t-low.modal-lead', 'Select your name in this archive so Reply Debt knows who sent the last message in each thread.'),
+        h('p.t-14.t-low.modal-lead', `Select your name in this archive so ${PRODUCT_NAME} knows who sent the last message in each thread.`),
         list,
       ],
       footer: [
@@ -682,8 +682,8 @@ function startApp() {
     if (wantsReset) {
       render();
       const ok = await confirmModal({
-        title: 'Clear saved Reply Debt data?',
-        text: 'You opened a reset link. Confirm if you want to remove all saved Reply Debt lists and preferences from this browser.',
+        title: `Clear saved ${PRODUCT_NAME} data?`,
+        text: `You opened a reset link. Confirm if you want to remove all saved ${PRODUCT_NAME} lists and preferences from this browser.`,
         confirmLabel: 'Delete local data',
       });
       if (ok) {
