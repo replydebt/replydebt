@@ -49,41 +49,91 @@ export function sanitizeMarks(src, maxEntries = 50000) {
   return out;
 }
 
+function isPlainObject(v) {
+  return Boolean(v && typeof v === 'object' && !Array.isArray(v));
+}
+
+function isNonNegNumber(v) {
+  return typeof v === 'number' && Number.isFinite(v) && v >= 0;
+}
+
+function isValidCompanyEntry(c) {
+  if (!isPlainObject(c) || typeof c.name !== 'string' || !isNonNegNumber(c.count)) return false;
+  if (c.key !== undefined && typeof c.key !== 'string') return false;
+  if (c.talked !== undefined && !isNonNegNumber(c.talked)) return false;
+  if (c.vouched !== undefined && !isNonNegNumber(c.vouched)) return false;
+  if (c.followed !== undefined && typeof c.followed !== 'boolean') return false;
+  return true;
+}
+
+function isValidInsights(ins) {
+  if (ins === undefined || ins === null) return true;
+  if (!isPlainObject(ins) || !isPlainObject(ins.coverage)) return false;
+  if (typeof ins.coverage.isComplete !== 'boolean') return false;
+  if (!isNonNegNumber(ins.coverage.totalFiles) || !isNonNegNumber(ins.coverage.readFiles) || !isNonNegNumber(ins.coverage.quarantinedFiles)) {
+    return false;
+  }
+  for (const key of ['credibility', 'persona', 'social', 'activity']) {
+    const sec = ins[key];
+    if (sec !== null && sec !== undefined && !isPlainObject(sec)) return false;
+  }
+  if (ins.credibility) {
+    if (!Array.isArray(ins.credibility.pillars) || !Array.isArray(ins.credibility.topTopics) || !Array.isArray(ins.credibility.risingTopics)) return false;
+  }
+  if (ins.persona) {
+    if (!Array.isArray(ins.persona.inferences) || !Array.isArray(ins.persona.topSkills)) return false;
+  }
+  if (ins.social) {
+    if (!isNonNegNumber(ins.social.endorsementsReceived) || !Array.isArray(ins.social.topEndorsedSkills)) return false;
+  }
+  if (ins.activity) {
+    if (!isNonNegNumber(ins.activity.reactionsTotal) || !Array.isArray(ins.activity.reactionTypes)) return false;
+  }
+  return true;
+}
+
 export function isValidSavedReport(report, now = Date.now()) {
-  if (!report || typeof report !== 'object' || Array.isArray(report) || report.isSample) return false;
-  if (report.version !== REPORT_VERSION) return false;
+  if (!isPlainObject(report) || report.isSample) return false;
+  if (report.version !== REPORT_VERSION && report.version !== 2) return false;
   if (!Number.isFinite(report.createdAt) || !Number.isFinite(report.expiresAt)) return false;
   if (report.expiresAt < now || report.expiresAt > now + (RETENTION_DAYS + 2) * DAY) return false;
-  if (!report.me || typeof report.me !== 'object' || typeof report.me.name !== 'string') return false;
+  if (!isPlainObject(report.me) || typeof report.me.name !== 'string') return false;
   if (report.me.headline !== undefined && typeof report.me.headline !== 'string') return false;
-  if (!report.stats || typeof report.stats !== 'object' || Array.isArray(report.stats)) return false;
+  if (!isPlainObject(report.stats)) return false;
   for (const val of Object.values(report.stats)) {
-    if (typeof val !== 'number' || !Number.isFinite(val) || val < 0) return false;
+    if (!isNonNegNumber(val)) return false;
   }
   for (const optArr of [report.found, report.warnings]) {
     if (optArr !== undefined && (!Array.isArray(optArr) || !optArr.every((x) => typeof x === 'string'))) return false;
   }
   const lists = [report.people, report.recruiters, report.replies, report.reconnect, report.topCompanies];
   if (!lists.every((arr) => Array.isArray(arr) && arr.length <= MAX_CSV_ROWS)) return false;
+  if (report.followedCompanies !== undefined) {
+    if (!Array.isArray(report.followedCompanies) || report.followedCompanies.length > MAX_CSV_ROWS) return false;
+    if (!report.followedCompanies.every(isValidCompanyEntry)) return false;
+  }
   for (const p of report.people) {
-    if (!p || typeof p !== 'object' || typeof p.key !== 'string' || typeof p.name !== 'string') return false;
+    if (!isPlainObject(p) || typeof p.key !== 'string' || typeof p.name !== 'string') return false;
     if (p.company !== undefined && typeof p.company !== 'string') return false;
     if (p.position !== undefined && typeof p.position !== 'string') return false;
     if (p.url !== undefined && typeof p.url !== 'string') return false;
     if (p.companyKey !== undefined && typeof p.companyKey !== 'string') return false;
+    if (p.sharedCompany !== undefined && typeof p.sharedCompany !== 'string') return false;
+    if (p.endorsedMe !== undefined && !isNonNegNumber(p.endorsedMe)) return false;
+    if (p.endorsedThem !== undefined && !isNonNegNumber(p.endorsedThem)) return false;
+    if (p.recReceived !== undefined && typeof p.recReceived !== 'boolean') return false;
+    if (p.recGiven !== undefined && typeof p.recGiven !== 'boolean') return false;
   }
   for (const list of [report.recruiters, report.replies, report.reconnect]) {
     for (const r of list) {
-      if (!r || typeof r !== 'object' || typeof r.personKey !== 'string') return false;
+      if (!isPlainObject(r) || typeof r.personKey !== 'string') return false;
     }
   }
   for (const r of report.replies) {
     if (r.convId !== undefined && typeof r.convId !== 'string') return false;
   }
-  for (const c of report.topCompanies) {
-    if (!c || typeof c !== 'object' || typeof c.name !== 'string' || !Number.isFinite(c.count) || c.count < 0) return false;
-    if (c.talked !== undefined && (!Number.isFinite(c.talked) || c.talked < 0)) return false;
-  }
+  if (!report.topCompanies.every(isValidCompanyEntry)) return false;
+  if (!isValidInsights(report.insights)) return false;
   return true;
 }
 
@@ -94,6 +144,7 @@ export const app = {
   lastInput: null,             // RAM-only: File / File[] handle from current session (0 copied bytes)
   persist: false,              // Default OFF (RAM-only); user opts in via pre-open notice
   companyQuery: '',            // In-memory company search query (never written to URL/history)
+  companyFilter: 'top',        // In-memory company directory filter: 'top' | 'followed'
   marks: Object.create(null),  // id -> { state, at, until? }
   peopleByKey: new Map(),
 };
@@ -178,6 +229,7 @@ export async function resetAll() {
   app.lastInput = null;
   app.persist = false;
   app.companyQuery = '';
+  app.companyFilter = 'top';
   app.marks = Object.create(null);
   app.peopleByKey = new Map();
   await store.clearAll();
@@ -194,6 +246,11 @@ export const hasSessionQuotes = () => Object.keys(app.quotes).length > 0;
 
 export function setCompanyQuery(q) {
   app.companyQuery = String(q || '');
+  emit();
+}
+
+export function setCompanyFilter(mode) {
+  app.companyFilter = mode === 'followed' ? 'followed' : 'top';
   emit();
 }
 

@@ -152,6 +152,7 @@ export function manageCard(current, counts) {
       item('recruiters', 'Recruiters', 'briefcase', counts.recruiters),
       item('reconnect', 'Reconnect', 'people', counts.reconnect),
       item('companies', 'Companies', 'building'),
+      item('insights', 'Insights', 'chart'),
     ),
   );
 }

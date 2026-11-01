@@ -1,7 +1,7 @@
 // Build a people + conversations graph from the raw export.
 // Matches people by LinkedIn profile slug first so same-named people never merge and
 // display-name changes over time never split a 1:1 thread into a false group chat.
-import { nameKey, profileSlug, fold } from './text.js';
+import { nameKey, profileSlug, companyKey, fold } from './text.js';
 
 const IGNORED_NAMES = new Set(['', 'linkedin member', 'linkedin', 'linkedin premium', 'sponsored']);
 
@@ -18,7 +18,16 @@ export function buildModel(data, me) {
   const people = new Map(); // key -> person
   const bySlug = new Map(); // slug -> person
   const byName = new Map(); // nameKey -> first person with that name
+  const allByName = new Map(); // nameKey -> person[]
   let anonSeq = 0;
+
+  const trackByName = (nk, p) => {
+    if (!nk) return;
+    if (!byName.has(nk)) byName.set(nk, p);
+    let arr = allByName.get(nk);
+    if (!arr) allByName.set(nk, (arr = []));
+    if (!arr.includes(p)) arr.push(p);
+  };
 
   const makePerson = (key, name, slug, url) => ({
     key,
@@ -37,6 +46,11 @@ export function buildModel(data, me) {
     lastFromThemAt: null,
     conversations: 0,
     lastConvId: null,
+    endorsedMe: 0,
+    endorsedThem: 0,
+    recReceived: false,
+    recGiven: false,
+    sharedCompany: '',
   });
 
   // 1. Register every 1st-degree connection without merging distinct people who share a name.
@@ -56,7 +70,7 @@ export function buildModel(data, me) {
       p = makePerson(key, c.name, slug, c.url);
       people.set(key, p);
       if (slug) bySlug.set(slug, p);
-      if (nk && !byName.has(nk)) byName.set(nk, p);
+      trackByName(nk, p);
     }
     p.isConnection = true;
     p.company = c.company || p.company;
@@ -89,14 +103,14 @@ export function buildModel(data, me) {
       const p = makePerson(`in:${slug}`, name, slug, url);
       people.set(p.key, p);
       bySlug.set(slug, p);
-      if (nk && !byName.has(nk)) byName.set(nk, p);
+      trackByName(nk, p);
       return p;
     }
     if (nk && byName.has(nk)) return byName.get(nk);
     const key = nk ? `n:${nk}` : `n:member#${++anonSeq}`;
     const p = makePerson(key, name, '', '');
     people.set(key, p);
-    if (nk) byName.set(nk, p);
+    trackByName(nk, p);
     return p;
   };
 
@@ -241,6 +255,62 @@ export function buildModel(data, me) {
     if (isMe(v.from, v.inviterUrl)) continue;
     const p = getPerson(v.from, v.inviterUrl);
     invites.push({ personKey: p.key, date: v.sentAt, text: v.message, folded: fold(v.message) });
+  }
+
+  // 5. Enrich people with social-capital signals (Endorsements, Recommendations, and Positions alumni overlap).
+  const matchExistingPerson = (name, url, companyHint = '') => {
+    const slug = profileSlug(url);
+    if (slug && bySlug.has(slug)) return bySlug.get(slug);
+    const nk = nameKey(name);
+    if (!nk || isMe(name, url)) return null;
+    const candidates = allByName.get(nk);
+    if (!candidates || !candidates.length) return null;
+    if (candidates.length > 1 && companyHint) {
+      const ck = companyKey(companyHint);
+      if (ck) {
+        const exact = candidates.find((c) => companyKey(c.company) === ck);
+        if (exact) return exact;
+      }
+    }
+    return candidates[0];
+  };
+
+  for (const e of data.endorsementsReceived || []) {
+    const p = matchExistingPerson(e.name, e.url);
+    if (p) {
+      p.endorsedMe++;
+      if (!p.url && e.url && profileSlug(e.url)) p.url = e.url;
+    }
+  }
+  for (const e of data.endorsementsGiven || []) {
+    const p = matchExistingPerson(e.name, e.url);
+    if (p) {
+      p.endorsedThem++;
+      if (!p.url && e.url && profileSlug(e.url)) p.url = e.url;
+    }
+  }
+  for (const r of data.recommendationsReceived || []) {
+    const p = matchExistingPerson(r.name, '', r.company);
+    if (p) p.recReceived = true;
+  }
+  for (const r of data.recommendationsGiven || []) {
+    const p = matchExistingPerson(r.name, '', r.company);
+    if (p) p.recGiven = true;
+  }
+
+  const myEmployers = new Map();
+  for (const pos of data.positions || []) {
+    const ck = companyKey(pos.company);
+    if (ck && ck.length >= 2 && !myEmployers.has(ck)) {
+      myEmployers.set(ck, pos.company);
+    }
+  }
+  if (myEmployers.size > 0) {
+    for (const p of people.values()) {
+      if (!p.company) continue;
+      const ck = companyKey(p.company);
+      if (ck && myEmployers.has(ck)) p.sharedCompany = myEmployers.get(ck);
+    }
   }
 
   return { people, conversations, invites, skipped, me };

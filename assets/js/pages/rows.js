@@ -36,6 +36,29 @@ function hideAction(p, el) {
   }), 'eyeOff'];
 }
 
+function trustBadges(p, { limit = 2 } = {}) {
+  const tags = [];
+  if (p.recReceived && p.recGiven) tags.push(h('span.tag', 'Mutual recommendation'));
+  else if (p.recReceived) tags.push(h('span.tag', 'Recommended you'));
+  else if (p.recGiven) tags.push(h('span.tag.tag--accent', 'You recommended'));
+  if (p.endorsedMe > 0) {
+    tags.push(h('span.tag.tag--accent', p.endorsedMe > 1 ? `Endorsed you (${p.endorsedMe})` : 'Endorsed you'));
+  } else if (p.endorsedThem > 0) {
+    tags.push(h('span.tag.tag--subtle', 'You endorsed'));
+  }
+  if (p.sharedCompany) tags.push(h('span.tag.tag--subtle', 'Shared company'));
+  return tags.slice(0, limit);
+}
+
+function trustContextNotes(p) {
+  const parts = [];
+  if (p.recReceived) parts.push('recommended you');
+  else if (p.recGiven) parts.push('you recommended them');
+  if (p.endorsedMe > 0) parts.push(`endorsed ${plural(p.endorsedMe, 'skill')}`);
+  if (p.sharedCompany) parts.push(`shared employer (${p.sharedCompany})`);
+  return parts.join(', ');
+}
+
 // ---------- Replies ----------
 export function replyRow(item) {
   const p = person(item.personKey);
@@ -154,11 +177,12 @@ export function recruiterRow(item) {
 // ---------- Reconnect ----------
 function sayHi(item, el, cls) {
   const p = person(item.personKey);
+  const trust = trustContextNotes(p);
   openComposer({
     person: p,
     kind: 'reconnect',
     ctx: { me: meName(), since: `last time was ${monthName(item.lastAt)}` },
-    context: `${plural(item.total, 'message')} together, last one ${relPhrase(item.lastAt)}`,
+    context: `${plural(item.total, 'message')} together, last one ${relPhrase(item.lastAt)}${trust ? ` · ${trust}` : ''}`,
     contextLabel: 'History',
     onSent: () => leave(el, cls, () => {
       const undo = setMark(reconId(item), 'done', { days: 90 });
@@ -170,6 +194,7 @@ function sayHi(item, el, cls) {
 export function reconnectCard(item) {
   const p = person(item.personKey);
   const el = h('article.pcard');
+  const badges = trustBadges(p, { limit: 1 });
   const skip = () => leave(el, 'pcard--leaving', () => {
     const undo = setMark(reconId(item), 'skipped', { days: 7 });
     toast(`Skipped ${p.name.split(' ')[0]} for this week.`, { action: { label: 'Undo', onClick: undo } });
@@ -182,6 +207,7 @@ export function reconnectCard(item) {
       'div.pcard__body',
       personName(p, 'pcard__name'),
       h('p.pcard__headline.clamp-2', headlineOf(p)),
+      badges.length ? h('div.row__tags', badges) : null,
       h('p.pcard__meta', icon('message', 16), `${plural(item.total, 'message')} · ${relTime(item.lastAt)} ago`),
     ),
     h(
@@ -195,11 +221,12 @@ export function reconnectCard(item) {
 export function reconnectRow(item) {
   const p = person(item.personKey);
   const el = h('article.row');
+  const badges = trustBadges(p, { limit: 2 });
   el.append(
     avatar(56, 'row__avatar'),
     h(
       'div.row__main',
-      personName(p),
+      h('div.row__title-line', personName(p), badges),
       h('div.row__headline.clamp-1', headlineOf(p)),
       h('div.row__meta', `${plural(item.total, 'message')} together · last ${relTime(item.lastAt)} ago`),
     ),
@@ -222,6 +249,11 @@ export function reconnectRow(item) {
 export function companyPersonRow(p, { target, warmest }) {
   const el = h('article.row');
   const talked = p.sent + p.received;
+  const trust = trustContextNotes(p);
+  const badges = [
+    warmest ? h('span.tag', icon('check', 12), 'Warmest path') : null,
+    ...trustBadges(p, { limit: 2 }),
+  ].filter(Boolean);
   let meta;
   if (talked > 0) meta = `${plural(talked, 'message')} together · last ${relTime(p.lastAt)} ago`;
   else if (p.connectedOn) meta = `Connected ${relTime(p.connectedOn)} ago · never messaged`;
@@ -230,7 +262,7 @@ export function companyPersonRow(p, { target, warmest }) {
     avatar(56, 'row__avatar'),
     h(
       'div.row__main',
-      h('div', personName(p), warmest ? h('span', ' ', h('span.tag', icon('check', 12), 'Warmest path')) : null),
+      h('div.row__title-line', personName(p), badges),
       h('div.row__headline.clamp-1', headlineOf(p)),
       h('div.row__meta', meta),
     ),
@@ -242,7 +274,10 @@ export function companyPersonRow(p, { target, warmest }) {
           person: p,
           kind: 'intro',
           ctx: { me: meName(), target: p.company || target },
-          context: talked ? `${plural(talked, 'message')} together, last one ${relPhrase(p.lastAt)}` : 'You have not messaged each other yet',
+          context: [
+            talked ? `${plural(talked, 'message')} together, last one ${relPhrase(p.lastAt)}` : 'You have not messaged each other yet',
+            trust,
+          ].filter(Boolean).join(' · '),
           contextLabel: 'History',
         }),
       }, 'Ask for intro'),

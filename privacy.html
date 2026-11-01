@@ -67,7 +67,7 @@
       <meta itemprop="url" content="https://replydebt.github.io/privacy.html">
       <meta itemprop="inLanguage" content="en">
       <meta itemprop="datePublished" content="2026-10-30">
-      <meta itemprop="dateModified" content="2026-10-31">
+      <meta itemprop="dateModified" content="2026-11-01">
       <h1 itemprop="name">Privacy &amp; Data Protection Notice</h1>
       <p class="t-14 t-low" itemprop="description">Effective date: October 30, 2026 · Applicable frameworks: EU/EEA General Data Protection Regulation (GDPR, Articles 13 &amp; 15-22) and Turkish Personal Data Protection Law No. 6698 (KVKK, Articles 10 &amp; 11).</p>
 
@@ -78,8 +78,8 @@
       <p>Reply Debt has <strong>no application server, no backend API, no user database, and no account registration</strong>. When you select or drop a LinkedIn data export archive (<code>.zip</code> or <code>.csv</code>), the file is parsed exclusively inside your own web browser on your own device using local JavaScript and a same-origin Web Worker.</p>
       <p>Every page enforces a strict Content Security Policy (<code>connect-src 'none'</code>, <code>form-action 'none'</code>) that instructs your browser to block outbound network transmissions of archive data. The publisher never receives, views, stores, or has technical access to your LinkedIn archive or any contacts inside it.</p>
 
-      <h2>3. Archive Files Read Locally</h2>
-      <p>Reply Debt reads at most four CSV files from an official LinkedIn data export and ignores every other file in the archive:</p>
+      <h2>3. Archive Files Read Locally &amp; Quarantined Sensitive Files</h2>
+      <p>Reply Debt reads the four core CSV files required for your action lists, optionally reads minimized social-capital and Complete-archive insight signals when present, and strictly quarantines sensitive PII, billing, verification, and login-IP files without ever decompressing them:</p>
       <table class="static-table">
         <thead>
           <tr>
@@ -97,17 +97,42 @@
           <tr>
             <td><code>messages.csv</code></td>
             <td data-label="Fields used locally">Conversation ID, sender/recipient names and profile URLs, timestamp, subject, message content (in tab RAM only)</td>
-            <td data-label="Excluded / ignored">Attachments and non-message exports</td>
+            <td data-label="Excluded / ignored">Drafts, attachments, and non-message exports</td>
           </tr>
           <tr>
             <td><code>Invitations.csv</code></td>
             <td data-label="Fields used locally">Sender/recipient names and profile URLs, direction, timestamp, invitation note (in tab RAM only)</td>
-            <td data-label="Excluded / ignored">All other account history files</td>
+            <td data-label="Excluded / ignored">Raw invitation notes are never persisted to browser storage</td>
           </tr>
           <tr>
-            <td><code>Profile.csv</code></td>
-            <td data-label="Fields used locally">Archive owner first/last name and headline (for identifying which side of a thread is you)</td>
-            <td data-label="Excluded / ignored">Phone numbers, addresses, ad targeting, and media</td>
+            <td><code>Profile.csv</code> &amp; <code>Positions.csv</code></td>
+            <td data-label="Fields used locally">Owner first/last name, headline, industry, and past/current employer names &amp; dates (for shared-employer alumni warmth)</td>
+            <td data-label="Excluded / ignored">Address, birth date, zip code, instant messengers, and job descriptions</td>
+          </tr>
+          <tr>
+            <td><code>Company Follows.csv</code>, <code>Job Seeker Preferences.csv</code> &amp; <code>Skills.csv</code></td>
+            <td data-label="Fields used locally">Followed company names, open-to-recruiter flag, dream companies, preferred job titles/types, and listed skill names</td>
+            <td data-label="Excluded / ignored">Commute addresses, phone numbers, and salary fields</td>
+          </tr>
+          <tr>
+            <td><code>Endorsement_*</code> &amp; <code>Recommendations_*</code></td>
+            <td data-label="Fields used locally">Endorser/recommender names, public profile URLs, company/title, skill names, and dates (for relationship warmth badges)</td>
+            <td data-label="Excluded / ignored"><strong>Recommendation prose (<code>Text</code> column) is dropped during parsing</strong></td>
+          </tr>
+          <tr>
+            <td><code>Inferred Credibility Scores.csv</code>, <code>Inferences_about_you.csv</code> &amp; <code>Ad_Targeting.csv</code></td>
+            <td data-label="Fields used locally">Notability tier/score, 5-pillar specialty grades, normalized topic authority scores, and professional audience/seniority segments</td>
+            <td data-label="Excluded / ignored"><strong>Personal demographic categories (<code>Member Age</code>, <code>Member Gender</code>, <code>Inferred personal characteristics</code>) are excluded</strong></td>
+          </tr>
+          <tr>
+            <td><code>Shares</code>, <code>Comments</code>, <code>Reactions</code>, <code>InstantReposts</code>, <code>Votes</code>, <code>Saved_Items</code>, <code>Member_Follows</code>, <code>Hashtag_Follows</code>, <code>SearchQueries</code> &amp; <code>Ads Clicked</code></td>
+            <td data-label="Fields used locally">Aggregate timestamps, reaction enum types (<code>LIKE</code>, <code>PRAISE</code>, etc.), follow status, and followed hashtag names only</td>
+            <td data-label="Excluded / ignored"><strong>Raw post commentary, comment prose, and raw <code>Search Query</code> strings are never read or stored</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Quarantined Files (Never Read)</strong><br><code>Email Addresses.csv</code>, <code>PhoneNumbers.csv</code>, <code>Whatsapp Phone Numbers.csv</code>, <code>Receipts_v2.csv</code>, <code>Verifications.csv</code>, <code>Logins.csv</code>, <code>Security Challenges.csv</code>, <code>Registration.csv</code>, <code>Notes.csv</code></td>
+            <td data-label="Fields used locally"><strong>None — never decompressed or read into memory</strong></td>
+            <td data-label="Excluded / ignored">Account emails, phone numbers, billing receipts, government ID verifications, login IP addresses, and private notes</td>
           </tr>
         </tbody>
       </table>

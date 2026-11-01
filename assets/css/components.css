@@ -235,10 +235,14 @@ a.row__name:hover { color: var(--action); text-decoration: underline; }
 .row__flag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--success); }
 .row__flag .icon { width: 16px; height: 16px; }
 .tag {
-  display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 10px;
-  font-size: 12px; font-weight: 600; line-height: 20px;
+  display: inline-flex; align-items: center; gap: 4px; min-height: 20px; padding: 1px 8px; border-radius: 10px;
+  font-size: 12px; font-weight: 600; line-height: 18px; max-width: 100%; overflow-wrap: anywhere;
   background: rgba(5, 118, 66, 0.14); color: var(--success); vertical-align: middle;
 }
+.tag--accent { background: var(--action-tint); color: var(--action); }
+.tag--subtle { background: var(--surface-2); color: var(--text-low); }
+.row__title-line { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0; }
+.row__tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 6px; }
 @media (max-width: 767px) {
   .card__header--lg { padding: 16px 16px 8px; }
   .row { flex-wrap: wrap; padding: 14px 16px; }

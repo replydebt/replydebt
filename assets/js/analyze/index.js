@@ -1,5 +1,5 @@
 // Orchestrates analysis and returns a compact report structurally free of raw messages,
-// InMail subjects, email addresses, and candidate lists.
+// InMail subjects, raw search/comment/post prose, email addresses, IPs, and candidate lists.
 import { RETENTION_DAYS } from '../config.js';
 import { detectMe } from '../core/identity.js';
 import { buildModel } from '../core/model.js';
@@ -8,9 +8,10 @@ import { DAY } from '../core/time.js';
 import { findRecruitersWithQuotes } from './recruiters.js';
 import { findRepliesWithQuotes } from './replies.js';
 import { findReconnect } from './reconnect.js';
-import { topCompanies } from './companies.js';
+import { topCompanies, followedCompaniesInNetwork, extractFollowedCompanyKeys } from './companies.js';
+import { buildInsights } from './insights.js';
 
-export const REPORT_VERSION = 2;
+export const REPORT_VERSION = 3;
 
 export function analyzeSession(data, { override, now = Date.now() } = {}) {
   const me = detectMe(data, override);
@@ -42,6 +43,11 @@ export function analyzeSession(data, { override, now = Date.now() } = {}) {
       firstAt: p.firstAt,
       lastAt: p.lastAt,
       lastConvId: p.lastConvId,
+      ...(p.endorsedMe ? { endorsedMe: p.endorsedMe } : {}),
+      ...(p.endorsedThem ? { endorsedThem: p.endorsedThem } : {}),
+      ...(p.recReceived ? { recReceived: true } : {}),
+      ...(p.recGiven ? { recGiven: true } : {}),
+      ...(p.sharedCompany ? { sharedCompany: p.sharedCompany } : {}),
     });
   }
 
@@ -49,6 +55,11 @@ export function analyzeSession(data, { override, now = Date.now() } = {}) {
   const never = connections.filter((p) => p.sent + p.received === 0).length;
   const activeYear = people.filter((p) => p.lastAt && now - p.lastAt < 365 * DAY && p.sent > 0 && p.received > 0).length;
   const lastMessageAt = data.messages.reduce((mx, m) => Math.max(mx, m.date), 0) || null;
+
+  const followedKeys = extractFollowedCompanyKeys(data);
+  const topList = topCompanies(people, { limit: 15, followedKeys });
+  const followedList = followedCompaniesInNetwork(people, followedKeys, 40);
+  const insights = buildInsights(data, { people, followedCompanies: followedList, now });
 
   const quotes = Object.assign(Object.create(null), recRes.quotes, repRes.quotes);
 
@@ -73,7 +84,9 @@ export function analyzeSession(data, { override, now = Date.now() } = {}) {
     recruiters,
     replies,
     reconnect,
-    topCompanies: topCompanies(people),
+    topCompanies: topList,
+    followedCompanies: followedList,
+    insights,
   };
 
   return { report, quotes, candidates: me.candidates };

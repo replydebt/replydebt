@@ -13,7 +13,7 @@ import { closeMenu } from './ui/menu.js';
 import { appNav } from './ui/nav.js';
 import {
   app, loadSaved, setSession, resetAll, counts, onChange,
-  hiddenCount, restoreHidden, setCompanyQuery,
+  hiddenCount, restoreHidden, setCompanyQuery, setCompanyFilter,
 } from './app/state.js';
 import { process as runAnalysis, warmWorker } from './app/client.js';
 import { handoff, setTab, notify, publicAppUrl, LINKEDIN_DOWNLOAD_URL } from './app/handoff.js';
@@ -22,10 +22,11 @@ import { renderLoading } from './pages/loading.js';
 import { renderHome } from './pages/home.js';
 import { renderReplies, renderRecruiters, renderReconnect } from './pages/lists.js';
 import { renderCompanies } from './pages/companies.js';
+import { renderInsights } from './pages/insights.js';
 
 const root = document.getElementById('app');
 const THEME_KEY = `${STORAGE_PREFIX}theme`;
-const ROUTES = { home: 'Home', replies: 'Replies', recruiters: 'Recruiters', reconnect: 'Reconnect', companies: 'Companies' };
+const ROUTES = { home: 'Home', replies: 'Replies', recruiters: 'Recruiters', reconnect: 'Reconnect', companies: 'Companies', insights: 'Insights' };
 
 function applyTheme(theme) {
   const safe = theme === 'dark' ? 'dark' : 'light';
@@ -125,6 +126,7 @@ function startApp() {
     else if (route === 'recruiters') page = renderRecruiters(actions, rerender);
     else if (route === 'reconnect') page = renderReconnect(actions);
     else if (route === 'companies') page = renderCompanies(actions, app.companyQuery);
+    else if (route === 'insights') page = renderInsights(actions);
     else page = renderHome(actions);
 
     const navQuery = route === 'companies' ? app.companyQuery : '';
@@ -169,7 +171,7 @@ function startApp() {
           h(
             'ul.gate-list',
             h('li', icon('shield', 18), h('span', h('b', '100% local processing: '), 'Parsed inside this browser tab\'s memory (RAM) on your device. Zero bytes are uploaded to any server — you can turn off Wi-Fi before opening to verify.')),
-            h('li', icon('check', 18), h('span', h('b', 'Minimized scope: '), 'Only Connections.csv, messages.csv, Invitations.csv, and Profile.csv are read. Email addresses in Connections.csv and all other archive files are ignored.')),
+            h('li', icon('check', 18), h('span', h('b', 'Minimized scope: '), 'Reads only core messaging/network CSVs plus optional credibility, persona, social-capital, and aggregate activity files. Sensitive files (Email Addresses, PhoneNumbers, Receipts, Verifications, Logins/Security IPs, private Notes) and connection email columns are quarantined and never read.')),
             h('li', icon('lock', 18), h('span', h('b', 'Memory-only & zero stored messages: '), `Results vanish when you close or refresh this tab unless you opt in below. Even when opted in, raw message bodies, InMail subjects, invitation notes, and emails are never written to browser storage, and saved lists auto-expire after ${RETENTION_DAYS} days.`)),
             h('li', icon('eyeOff', 18), h('span', h('b', 'Shared devices & browser extensions: '), 'Do not open archives on a public or shared computer. If you have browser extensions with "read all websites" access, use a Private / Incognito window.')),
             h('li', icon('people', 18), h('span', h('b', 'Personal communication only: '), 'Your archive contains names and messages of third-party contacts. Use these lists solely for your own personal follow-ups.')),
@@ -303,7 +305,7 @@ function startApp() {
     'aria-hidden': 'true',
   });
   fileInput.addEventListener('change', () => {
-    const files = Array.from(fileInput.files || []).slice(0, 65);
+    const files = Array.from(fileInput.files || []).slice(0, 130);
     fileInput.value = '';
     if (files.length) handleFiles(files.length === 1 ? files[0] : files);
   });
@@ -539,6 +541,14 @@ function startApp() {
     ...footerActions,
     deleteAll,
     openArchive: () => fileInput.click(),
+    openInsights: () => { location.hash = '#/insights'; },
+    setCompanyFilter: (mode) => setCompanyFilter(mode),
+    openFollowedCompanies: () => {
+      app.companyQuery = '';
+      app.companyFilter = 'followed';
+      if (parseHash() === 'companies') render();
+      else location.hash = '#/companies';
+    },
     searchCompany: (q, { live = false } = {}) => {
       const nextQ = String(q || '');
       if (live && !nextQ && parseHash() !== 'companies' && !app.companyQuery) return;
@@ -590,8 +600,8 @@ function startApp() {
   // ---------- Drag & drop anywhere (supports .zip, .csv files, and unzipped folder drops) ----------
   async function extractDroppedFiles(dataTransfer) {
     const MAX_SCANNED_ENTRIES = 600;
-    const MAX_COLLECTED_FILES = 32;
-    const items = Array.from(dataTransfer?.items || []).slice(0, 65);
+    const MAX_COLLECTED_FILES = 128;
+    const items = Array.from(dataTransfer?.items || []).slice(0, 130);
     const entries = items.map((it) => it.webkitGetAsEntry?.()).filter(Boolean);
     if (entries.some((e) => e.isDirectory)) {
       const collected = [];
@@ -626,7 +636,7 @@ function startApp() {
         return collected.map((x) => x.file);
       }
     }
-    return Array.from(dataTransfer?.files || []).slice(0, 65);
+    return Array.from(dataTransfer?.files || []).slice(0, 130);
   }
 
   const dropOverlay = h('div.drop-overlay', { 'aria-hidden': 'true' }, h('div.drop-overlay__card', icon('upload', 32), 'Drop your LinkedIn archive to open locally'));

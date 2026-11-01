@@ -150,6 +150,7 @@ function meMenu(me, actions) {
     h(
       'div.menu__section',
       h('div.menu__title', 'Account'),
+      menuItem('Archive & algorithm insights', actions.openInsights, icon('chart', 18)),
       menuItem('Change who I am', actions.changeMe, icon('user', 18)),
       menuItem(isDark ? 'Display: Light mode' : 'Display: Dark mode', actions.toggleTheme, icon(isDark ? 'sun' : 'moon', 18)),
       menuItem('How to get your archive', actions.help, icon('help', 18)),

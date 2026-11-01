@@ -33,7 +33,7 @@ function lookupMonth(rawToken) {
 }
 
 function validUtc(year, month0, day, hour = 0, min = 0, sec = 0) {
-  if (!Number.isInteger(year) || year < 1995 || year > 2100) return null;
+  if (!Number.isInteger(year) || year < 1970 || year > 2100) return null;
   if (!Number.isInteger(month0) || month0 < 0 || month0 > 11) return null;
   if (!Number.isInteger(day) || day < 1 || day > 31) return null;
   if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) return null;
@@ -45,15 +45,16 @@ function validUtc(year, month0, day, hour = 0, min = 0, sec = 0) {
 
 /**
  * Parse a date string from a LinkedIn export. Returns epoch ms or null.
- * Supports ISO/UTC, localized month names across 21 locales, CJK dates, DD.MM.YYYY, MM/DD/YY, and DD/MM/YYYY.
+ * Supports ISO/UTC (dash or slash), Java GMT/UTC weekday timestamps, localized month names across 21 locales,
+ * CJK dates, DD.MM.YYYY, MM/DD/YY, DD/MM/YYYY, and MMM YYYY / YYYY career dates.
  */
 export function parseDate(raw) {
   if (raw === null || raw === undefined) return null;
   const s = String(raw).trim();
   if (!s) return null;
 
-  // 2024-05-12 14:33:10 UTC  /  2024-05-12T14:33:10Z  /  2024-05-12
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?)?\s*(UTC|Z|[+-]\d{2}:?\d{2})?$/i);
+  // 2024-05-12 14:33:10 UTC  /  2026/10/29 14:22:10 UTC  /  2024-05-12T14:33:10Z  /  2026/10/29
+  let m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?)?\s*(UTC|GMT|Z|[+-]\d{2}:?\d{2})?$/i);
   if (m) {
     const [, y, mo, d, h = '0', mi = '0', se = '0', tz] = m;
     let t = validUtc(+y, +mo - 1, +d, +h, +mi, +se);
@@ -67,6 +68,13 @@ export function parseDate(raw) {
       t -= sign * (tzH * 60 + tzM) * 60000;
     }
     return t;
+  }
+
+  // Java Date.toString(): Wed Oct 29 14:22:10 GMT 2026 / Thu Oct 29 14:22:10 UTC 2026
+  m = s.match(/^(?:[\p{L}]{2,}\.?,?\s+)?([\p{L}]{2,})\.?\s+(\d{1,2})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s+(?:UTC|GMT|Z)\s+(\d{4})$/iu);
+  if (m) {
+    const mon = lookupMonth(m[1]);
+    if (mon !== undefined) return validUtc(+m[6], mon, +m[2], +m[3], +m[4], +(m[5] || 0));
   }
 
   // CJK: 2023年3月15日 / 2023년 3월 15일
@@ -112,6 +120,17 @@ export function parseDate(raw) {
     const [month, day] = n1 > 12 ? [n2, n1] : [n1, n2];
     return validUtc(year, month - 1, day, hour, +mi, +se);
   }
+
+  // Career Month + Year: Aug 2024 / Eki 2023 / févr. 2022
+  m = s.match(/^([\p{L}]{2,})\.?,?\s+(\d{4})$/iu);
+  if (m) {
+    const mon = lookupMonth(m[1]);
+    if (mon !== undefined) return validUtc(+m[2], mon, 1);
+  }
+
+  // Career Year-only: 2021
+  m = s.match(/^(\d{4})$/);
+  if (m) return validUtc(+m[1], 0, 1);
 
   return null;
 }

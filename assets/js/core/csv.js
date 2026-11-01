@@ -128,9 +128,10 @@ export function findHeaderRow(rows, expected, minHits = 2) {
  */
 export function parseCsv(text, fieldMap, { maxRows = MAX_CSV_ROWS, maxCols = MAX_CSV_COLS, maxCellChars = MAX_CSV_CELL_CHARS, maxTotalCells = MAX_CSV_TOTAL_CELLS } = {}) {
   const rows = parseRows(text, maxRows, { maxCols, maxCellChars, maxTotalCells });
-  const allAliases = Object.values(fieldMap).flat();
-  const headerIdx = findHeaderRow(rows, allAliases);
-  if (headerIdx < 0) return { records: [], header: [], missing: Object.keys(fieldMap) };
+  const fieldCount = Object.keys(fieldMap || {}).length;
+  const allAliases = Object.values(fieldMap || {}).flat();
+  const headerIdx = fieldCount > 0 ? findHeaderRow(rows, allAliases, Math.min(2, fieldCount)) : -1;
+  if (headerIdx < 0) return { records: [], header: [], missing: Object.keys(fieldMap || {}) };
 
   const header = rows[headerIdx].map(norm);
   const index = Object.create(null);
@@ -154,4 +155,120 @@ export function parseCsv(text, fieldMap, { maxRows = MAX_CSV_ROWS, maxCols = MAX
     records.push(rec);
   }
   return { records, header: rows[headerIdx], missing };
+}
+
+/**
+ * Parse a CSV that may contain duplicate column headers (such as LinkedIn's Ad_Targeting.csv),
+ * coalescing all non-empty values across every matching column for each field.
+ */
+export function parseDuplicateHeaderCsv(text, fieldMap, opts = {}) {
+  const rows = parseRows(text, opts.maxRows ?? MAX_CSV_ROWS, opts);
+  const fieldCount = Object.keys(fieldMap || {}).length;
+  const allAliases = Object.values(fieldMap || {}).flat();
+  const headerIdx = fieldCount > 0 ? findHeaderRow(rows, allAliases, Math.min(2, fieldCount)) : -1;
+  if (headerIdx < 0) return { records: [], header: [], missing: Object.keys(fieldMap || {}) };
+
+  const header = rows[headerIdx].map(norm);
+  const positions = Object.create(null);
+  const missing = [];
+  for (const [field, aliases] of Object.entries(fieldMap)) {
+    const wanted = new Set(aliases.map(norm));
+    const cols = [];
+    for (let c = 0; c < header.length; c++) {
+      if (wanted.has(header[c])) cols.push(c);
+    }
+    if (!cols.length) missing.push(field);
+    else positions[field] = cols;
+  }
+
+  const fields = Object.keys(fieldMap);
+  const records = [];
+  for (let r = headerIdx + 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (row.length === 1 && row[0].trim() === '') continue;
+    const rec = Object.create(null);
+    for (const field of fields) {
+      const cols = positions[field];
+      if (!cols) {
+        rec[field] = '';
+        continue;
+      }
+      const seen = new Set();
+      const parts = [];
+      for (const c of cols) {
+        const val = (row[c] ?? '').trim();
+        if (val && !seen.has(val)) {
+          seen.add(val);
+          parts.push(val);
+        }
+      }
+      rec[field] = parts.join('; ');
+    }
+    records.push(rec);
+  }
+  return { records, header: rows[headerIdx], missing };
+}
+
+/**
+ * Parse LinkedIn's wide time-series Inferred Credibility Scores.csv
+ * (ScoreType, Topic, Category, Range, followed by YYYY-MM-DD snapshot columns).
+ */
+export function parseCredibilityCsv(text, opts = {}) {
+  const rows = parseRows(text, opts.maxRows ?? MAX_CSV_ROWS, opts);
+  const headerIdx = findHeaderRow(rows, ['ScoreType', 'Topic', 'Category', 'Range'], 3);
+  if (headerIdx < 0) return [];
+  const rawHeader = rows[headerIdx];
+  const header = rawHeader.map(norm);
+  const iType = header.indexOf('scoretype');
+  const iTopic = header.indexOf('topic');
+  const iCat = header.indexOf('category');
+  const iRange = header.indexOf('range');
+  if (iType < 0 || iCat < 0) return [];
+
+  const dateCols = [];
+  for (let c = 0; c < rawHeader.length; c++) {
+    const label = String(rawHeader[c] || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(label)) dateCols.push({ col: c, date: label });
+  }
+  dateCols.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  if (!dateCols.length) return [];
+
+  const out = [];
+  for (let r = headerIdx + 1; r < rows.length; r++) {
+    const row = rows[r];
+    const scoreType = (row[iType] ?? '').trim();
+    const category = (row[iCat] ?? '').trim();
+    if (!scoreType || !category) continue;
+    let latest = null;
+    let latestDate = '';
+    let earliest = null;
+    let earliestDate = '';
+    let snapshots = 0;
+    for (const { col, date } of dateCols) {
+      const raw = (row[col] ?? '').trim();
+      if (!raw) continue;
+      const num = Number(raw);
+      if (!Number.isFinite(num)) continue;
+      if (snapshots === 0) {
+        latest = num;
+        latestDate = date;
+      }
+      earliest = num;
+      earliestDate = date;
+      snapshots++;
+    }
+    if (snapshots === 0) continue;
+    out.push({
+      scoreType,
+      topic: iTopic >= 0 ? (row[iTopic] ?? '').trim() : '',
+      category,
+      range: iRange >= 0 ? (row[iRange] ?? '').trim() : '',
+      latest,
+      latestDate,
+      earliest,
+      earliestDate,
+      snapshots,
+    });
+  }
+  return out;
 }

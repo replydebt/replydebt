@@ -38,8 +38,11 @@ test('loader: full sample archive round-trips through a real zip', async () => {
   assert.equal(data.profile.name, 'Alex Morgan');
   assert.ok(data.connections.length > 300);
   assert.ok(data.messages.length > 100);
-  assert.equal(data.invitations.length, 1);
-  assert.deepEqual(data.found.sort(), ['connections', 'invitations', 'messages', 'profile']);
+  assert.equal(data.invitations.length, 3);
+  assert.equal(data.quarantinedCount, 2);
+  for (const k of ['connections', 'invitations', 'messages', 'profile', 'positions', 'companyFollows', 'credibility', 'inferences', 'adTargeting', 'reactions', 'shares', 'comments', 'searchQueries']) {
+    assert.ok(data.found.includes(k), `expected sample export to detect ${k}`);
+  }
 });
 
 test('loader: rejects an archive without LinkedIn files', async () => {
@@ -143,4 +146,98 @@ test('templates: variables are filled', () => {
   assert.match(t.text, /at Vela Payments/);
   assert.match(t.text, /Alex$/);
   assert.doesNotMatch(t.text, /\{\w+\}/);
+});
+
+test('complete export: decodes credibility scores, persona, social capital warmth, followed companies, and strictly quarantines sensitive PII/IP/prose', async () => {
+  const report = await sampleReport();
+  assert.equal(report.version, 3);
+  assert.equal(report.insights.coverage.isComplete, true);
+  assert.equal(report.insights.coverage.quarantinedFiles, 2);
+
+  // Credibility & 5-pillar specialty decoding
+  const cred = report.insights.credibility;
+  assert.ok(cred);
+  assert.equal(cred.notabilityTier, 2);
+  assert.equal(cred.notabilityScore, 2.38);
+  assert.equal(cred.notabilityDelta, 0.24);
+  assert.equal(cred.pillars.length, 2);
+  assert.equal(cred.pillars[0].topic, 'Design Systems');
+  assert.equal(cred.pillars[0].weakest, 'Content & output');
+  assert.equal(cred.topTopics[0].topic, 'Design Systems');
+  assert.ok(cred.risingTopics.some((t) => t.topic === 'Design Tokens'));
+
+  // Persona & Ad Targeting minimization
+  const persona = report.insights.persona;
+  assert.ok(persona);
+  assert.equal(persona.inferences.length, 3, 'Inferred personal characteristics must be excluded');
+  assert.ok(persona.jobTitles.includes('Design Systems Lead'), 'duplicate Job Titles column must coalesce');
+  assert.equal(persona.openToRecruiters, true);
+  assert.equal(persona.listedSkillCount, 10);
+
+  // Social capital enrichment & Followed target companies
+  const emma = report.people.find((p) => p.name === 'Emma Collins');
+  assert.equal(emma.recReceived, true);
+  assert.equal(emma.endorsedMe, 3);
+  assert.equal(emma.endorsedThem, 1);
+  const marco = report.people.find((p) => p.name === 'Marco Bianchi');
+  assert.equal(marco.sharedCompany, 'Kestrel Bank');
+  assert.equal(marco.recGiven, true);
+
+  assert.equal(report.followedCompanies.length, 5);
+  assert.ok(report.followedCompanies.some((c) => c.name === 'Lumen Labs' && c.followed));
+  assert.equal(report.insights.social.outboundPending, 2);
+  assert.equal(report.insights.social.outboundStale90d, 2);
+
+  // Activity footprint
+  const act = report.insights.activity;
+  assert.equal(act.sharesTotal, 14);
+  assert.equal(act.commentsTotal, 38);
+  assert.equal(act.reactionsTotal, 72);
+  assert.equal(act.searchesTotal, 24);
+  assert.ok(act.hashtags.includes('designsystems'));
+
+  // Strict quarantine & prose-exclusion proof on member-ID-suffixed Complete export files
+  const { analyzeSession } = await import('../assets/js/analyze/index.js');
+  const CANARY_SEARCH = 'CANARY_RAW_SEARCH_QUERY_9012';
+  const CANARY_POST = 'CANARY_RAW_POST_COMMENTARY_8123';
+  const CANARY_COMMENT = 'CANARY_RAW_COMMENT_PROSE_7234';
+  const CANARY_REC = 'CANARY_RAW_RECOMMENDATION_TEXT_6345';
+  const CANARY_AGE = 'CANARY_AGE_35_TO_54';
+  const CANARY_GENDER = 'CANARY_GENDER_VALUE';
+  const CANARY_PERSONAL = 'CANARY_PERSONAL_DEMOGRAPHIC';
+
+  const lazyFiles = new Map([
+    ['Connections.csv', async () => 'First Name,Last Name,URL,Company,Position,Connected On\nEmma,Collins,https://www.linkedin.com/in/emma-c,Lumen Labs,Product Manager,14 Jan 2024\n'],
+    ['Recommendations_Received.csv', async () => `First Name,Last Name,Company,Job Title,Text,Creation Date,Status\nEmma,Collins,Lumen Labs,Product Manager,${CANARY_REC},"10/14/24, 9:00 AM",VISIBLE\n`],
+    ['Ad_Targeting.csv', async () => `Member Age,Member Gender,Years of Experience,Job Seniorities\n${CANARY_AGE},${CANARY_GENDER},8 to 12 years,Senior\n`],
+    ['Inferences_about_you.csv', async () => `Category,Type of inference,Description,Inference\nInferred personal characteristics,${CANARY_PERSONAL},desc,${CANARY_PERSONAL}\nCareer,Senior IC,desc,True\n`],
+    ['Shares_714042524.csv', async () => `Date,ShareLink,ShareCommentary,Visibility\n2026-10-10 10:00:00 UTC,https://www.linkedin.com/feed/1,${CANARY_POST},PUBLIC\n`],
+    ['Comments_714042524.csv', async () => `Date,Link,Message\n2026-10-11 10:00:00 UTC,https://www.linkedin.com/feed/2,${CANARY_COMMENT}\n`],
+    ['Reactions_714042524.csv', async () => 'Date,Type,Link\n2026-10-12 10:00:00 UTC,PRAISE,https://www.linkedin.com/feed/3\n'],
+    ['SearchQueries.csv', async () => `Time,Search Query\n2026/10/13 10:00:00 UTC,${CANARY_SEARCH}\n`],
+  ]);
+
+  const quarantinedPaths = [
+    'Email Addresses.csv',
+    'PhoneNumbers.csv',
+    'Whatsapp Phone Numbers.csv',
+    'Receipts_v2.csv',
+    'Verifications/Verifications.csv',
+    'Logins.csv',
+    'Security Challenges.csv',
+    'Registration.csv',
+    'Notes.csv',
+  ];
+  for (const qp of quarantinedPaths) {
+    lazyFiles.set(qp, async () => assert.fail(`Quarantined sensitive file "${qp}" must never be decompressed or read`));
+  }
+
+  const loaded = await loadExport(lazyFiles);
+  assert.equal(loaded.quarantinedCount, quarantinedPaths.length);
+  const session = analyzeSession(loaded, { now: NOW });
+  const dump = JSON.stringify(session);
+  for (const secret of [CANARY_SEARCH, CANARY_POST, CANARY_COMMENT, CANARY_REC, CANARY_AGE, CANARY_GENDER, CANARY_PERSONAL]) {
+    assert.equal(dump.includes(secret), false, `Excluded secret "${secret}" leaked into session/report`);
+  }
+  assert.equal(session.report.insights.activity.reactionsTypes?.[0]?.type || session.report.insights.activity.reactionTypes[0].type, 'PRAISE');
 });

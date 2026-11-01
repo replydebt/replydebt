@@ -6,7 +6,7 @@ import { decodeTextBytes } from '../core/text.js';
 import { analyzeSession } from '../analyze/index.js';
 import { sampleFiles } from '../demo/sample.js';
 
-export const MAX_CSV_FILES = 64;
+export const MAX_CSV_FILES = 128;
 
 async function filesFromInput(input) {
   if (input.kind === 'sample') return sampleFiles();

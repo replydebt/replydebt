@@ -7,10 +7,16 @@ export function findReconnect(model, excludeKeys = new Set(), now = Date.now()) 
   for (const p of model.people.values()) {
     if (excludeKeys.has(p.key)) continue;
     const total = p.sent + p.received;
-    if (p.sent < 2 || p.received < 2 || total < 4 || !p.lastAt) continue;
+    const trustBonus = (p.recReceived || p.recGiven ? 2.0 : 0)
+      + ((p.endorsedMe || 0) + (p.endorsedThem || 0) > 0 ? 1.0 : 0)
+      + (p.sharedCompany ? 1.2 : 0);
+    const hasHistory = trustBonus >= 1.0
+      ? (p.sent >= 1 && p.received >= 1 && total >= 2)
+      : (p.sent >= 2 && p.received >= 2 && total >= 4);
+    if (!hasHistory || !p.lastAt) continue;
     const silence = (now - p.lastAt) / DAY;
     if (silence < 180) continue;
-    const score = Math.log2(1 + total) * Math.min(silence / 365, 3) + (p.isConnection ? 0.5 : 0);
+    const score = Math.log2(1 + total) * Math.min(silence / 365, 3) + (p.isConnection ? 0.5 : 0) + trustBonus;
     out.push({ personKey: p.key, lastAt: p.lastAt, total, score });
   }
   out.sort((a, b) => b.score - a.score);

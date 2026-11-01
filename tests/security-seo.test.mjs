@@ -329,8 +329,8 @@ test('security/csv & loader: column/cell/total-cell bombs, headerless decoys, ne
   assert.equal(detected.connections, 'Connections.csv');
   assert.equal(detected.messages, 'sub/messages.csv');
 
-  // 6. >64 raw CSV files flood rejected immediately
-  const flood = Array.from({ length: 65 }, (_, i) => new File([VALID_CONNECTIONS_CSV], `Connections_${i}.csv`));
+  // 6. >128 raw CSV files flood rejected immediately (while Complete ~54-file exports succeed)
+  const flood = Array.from({ length: 129 }, (_, i) => new File([VALID_CONNECTIONS_CSV], `Connections_${i}.csv`));
   await assert.rejects(
     () => runCsvFiles(flood),
     (err) => err.code === 'ZIP_LIMIT',
@@ -459,6 +459,14 @@ test('security/sanitization: Unicode Bidi overrides, HTML-entity Bidi escapes, L
     topCompanies: [],
   };
   assert.equal(isValidSavedReport(validReport, now), true);
+  assert.equal(isValidSavedReport({
+    ...validReport,
+    version: 3,
+    followedCompanies: [],
+    insights: { coverage: { isComplete: true, totalFiles: 26, readFiles: 24, quarantinedFiles: 2 } },
+  }, now), true);
+  assert.equal(isValidSavedReport({ ...validReport, version: 3, followedCompanies: [null] }, now), false);
+  assert.equal(isValidSavedReport({ ...validReport, version: 3, insights: 'corrupted' }, now), false);
   assert.equal(isValidSavedReport({ ...validReport, isSample: true }, now), false);
   assert.equal(isValidSavedReport({ ...validReport, version: 1 }, now), false);
   assert.equal(isValidSavedReport({ ...validReport, expiresAt: now + 365 * 86400000 }, now), false);

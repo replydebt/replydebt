@@ -3,6 +3,7 @@
 import { DAY } from '../core/time.js';
 import { mulberry32 } from '../core/text.js';
 
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const esc = (v) => {
@@ -15,6 +16,18 @@ const pad = (n) => String(n).padStart(2, '0');
 const msgDate = (t) => {
   const d = new Date(t);
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`;
+};
+const slashUtcDate = (t) => {
+  const d = new Date(t);
+  return `${d.getUTCFullYear()}/${pad(d.getUTCMonth() + 1)}/${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`;
+};
+const javaDate = (t) => {
+  const d = new Date(t);
+  return `${DAYS[d.getUTCDay()]} ${MON[d.getUTCMonth()]} ${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} GMT ${d.getUTCFullYear()}`;
+};
+const isoDay = (t) => {
+  const d = new Date(t);
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 };
 const connDate = (t) => {
   const d = new Date(t);
@@ -220,6 +233,70 @@ export function buildSampleExport(now = Date.now()) {
 
   const notes = 'Notes:\r\n"When exporting your connection data, you may notice that some of the email addresses are missing. You will only see email addresses for connections who have allowed their connections to see or download their email address using this setting https://www.linkedin.com/psettings/privacy/email. You can learn more here https://www.linkedin.com/help/linkedin/answer/261"\r\n\r\n';
 
+  // Two unaccepted outgoing invitations older than 90 days for invitation-hygiene insights
+  invitations.push(
+    [me, 'Claire Laurent', invDate(now - 142 * DAY), 'Hi Claire, enjoyed your panel on design tokens at Config!', 'OUTGOING', meUrl, 'https://www.linkedin.com/in/claire-laurent-ux'],
+    [me, 'Darius Patel', invDate(now - 196 * DAY), '', 'OUTGOING', meUrl, 'https://www.linkedin.com/in/darius-patel-pm'],
+  );
+
+  const bareUrl = (u) => String(u || '').replace(/^https?:\/\//i, '');
+  const marco = people.get('Marco Bianchi');
+  const ravi = people.get('Ravi Sharma');
+
+  const d0 = isoDay(now - 2 * DAY);
+  const d1 = isoDay(now - 16 * DAY);
+  const d2 = isoDay(now - 45 * DAY);
+  const d3 = isoDay(now - 90 * DAY);
+
+  const credibilityRows = [
+    ['Notability', '', 'Discrete Notability Tier', '0-4 integer', '2', '2', '2', '2'],
+    ['Notability', '', 'Aggregated Notability Score', '0-5 float', '', '2.38', '2.26', '2.14'],
+    ['Topic Credibility', 'Design Systems', 'Role and scope', '1-4 integer', '4', '4', '4', '3'],
+    ['Topic Credibility', 'Design Systems', 'Tenure and experience', '1-4 integer', '4', '4', '4', '4'],
+    ['Topic Credibility', 'Design Systems', 'Content and output', '1-4 integer', '2', '2', '2', '1'],
+    ['Topic Credibility', 'Design Systems', 'Education and credentials', '1-4 integer', '3', '3', '3', '3'],
+    ['Topic Credibility', 'Design Systems', 'Validation and influence', '1-4 integer', '4', '4', '3', '3'],
+    ['Topic Credibility', 'Product Design', 'Role and scope', '1-4 integer', '4', '4', '4', '4'],
+    ['Topic Credibility', 'Product Design', 'Tenure and experience', '1-4 integer', '4', '4', '4', '4'],
+    ['Topic Credibility', 'Product Design', 'Content and output', '1-4 integer', '3', '3', '2', '2'],
+    ['Topic Credibility', 'Product Design', 'Education and credentials', '1-4 integer', '3', '3', '3', '3'],
+    ['Topic Credibility', 'Product Design', 'Validation and influence', '1-4 integer', '3', '3', '3', '3'],
+    ['Topic Credibility', 'Design Systems', 'Topic Normalized Score', '1-4 float', '3.82', '3.74', '3.62', '3.54'],
+    ['Topic Credibility', 'User Experience Design (UX)', 'Topic Normalized Score', '1-4 float', '3.68', '3.64', '3.59', '3.55'],
+    ['Topic Credibility', 'Product Design', 'Topic Normalized Score', '1-4 float', '3.61', '3.58', '3.52', '3.49'],
+    ['Topic Credibility', 'Design Tokens', 'Topic Normalized Score', '1-4 float', '3.45', '3.31', '3.12', '2.98'],
+    ['Topic Credibility', 'Interaction Design', 'Topic Normalized Score', '1-4 float', '3.42', '3.34', '3.25', '3.18'],
+    ['Topic Credibility', 'Web Accessibility', 'Topic Normalized Score', '1-4 float', '3.24', '3.18', '3.09', '3.02'],
+    ['Topic Credibility', 'Prototyping', 'Topic Normalized Score', '1-4 float', '3.12', '3.11', '3.10', '3.09'],
+    ['Topic Credibility', 'User Research', 'Topic Normalized Score', '1-4 float', '2.94', '2.92', '2.91', '2.90'],
+    ['Topic Credibility', 'Frontend Architecture', 'Topic Normalized Score', '1-4 float', '2.66', '2.58', '2.50', '2.44'],
+    ['Topic Credibility', 'Product Management', 'Topic Normalized Score', '1-4 float', '2.48', '2.47', '2.46', '2.45'],
+  ];
+
+  const shareRows = Array.from({ length: 14 }, (_, idx) => [
+    msgDate(now - (idx * 34 + 6) * DAY),
+    `https://www.linkedin.com/feed/update/urn:li:share:710000${idx}`,
+    'Synthetic sample post commentary omitted during insights aggregation.',
+    '',
+    '',
+    'MEMBER_NETWORK',
+  ]);
+  const commentRows = Array.from({ length: 38 }, (_, idx) => [
+    msgDate(now - (idx * 14 + 2) * DAY),
+    `https://www.linkedin.com/feed/update/urn:li:activity:720000${idx}`,
+    'Synthetic sample comment prose omitted during insights aggregation.',
+  ]);
+  const reactionPalette = ['LIKE', 'LIKE', 'LIKE', 'PRAISE', 'INTEREST', 'INTEREST', 'EMPATHY', 'APPRECIATION', 'ENTERTAINMENT'];
+  const reactionRows = Array.from({ length: 72 }, (_, idx) => [
+    msgDate(now - (idx * 7 + 1) * DAY),
+    reactionPalette[idx % reactionPalette.length],
+    `https://www.linkedin.com/feed/update/urn:li:activity:730000${idx}`,
+  ]);
+  const searchRows = Array.from({ length: 24 }, (_, idx) => [
+    slashUtcDate(now - (idx * 11 + 3) * DAY),
+    'synthetic query excluded',
+  ]);
+
   const files = new Map();
   files.set('Profile.csv', csv(
     ['First Name', 'Last Name', 'Maiden Name', 'Address', 'Birth Date', 'Headline', 'Summary', 'Industry', 'Zip Code', 'Geo Location', 'Twitter Handles', 'Websites', 'Instant Messengers'],
@@ -228,6 +305,129 @@ export function buildSampleExport(now = Date.now()) {
   files.set('Connections.csv', notes + csv(['First Name', 'Last Name', 'URL', 'Email Address', 'Company', 'Position', 'Connected On'], connections));
   files.set('messages.csv', csv(['CONVERSATION ID', 'CONVERSATION TITLE', 'FROM', 'SENDER PROFILE URL', 'TO', 'RECIPIENT PROFILE URLS', 'DATE', 'SUBJECT', 'CONTENT', 'FOLDER', 'IS MESSAGE DRAFT'], messages));
   files.set('Invitations.csv', csv(['From', 'To', 'Sent At', 'Message', 'Direction', 'inviterProfileUrl', 'inviteeProfileUrl'], invitations));
+
+  // Career, target companies & social capital enrichment CSVs
+  files.set('Positions.csv', csv(
+    ['Company Name', 'Title', 'Description', 'Location', 'Started On', 'Finished On'],
+    [
+      ['Brightwave', 'Senior Product Designer', 'Design systems and core workflows.', 'London, United Kingdom', 'Aug 2022', ''],
+      ['Kestrel Bank', 'Product Designer', 'Consumer mobile banking experience.', 'London, United Kingdom', 'Mar 2019', 'Jul 2022'],
+    ],
+  ));
+  files.set('Company Follows.csv', csv(
+    ['Organization', 'Followed On'],
+    [
+      ['Lumen Labs', javaDate(now - 420 * DAY)],
+      ['Vela Payments', javaDate(now - 310 * DAY)],
+      ['Orbital Health', javaDate(now - 280 * DAY)],
+      ['Cobalt Cloud', javaDate(now - 190 * DAY)],
+      ['Summit Analytics', javaDate(now - 120 * DAY)],
+      ['Linear', javaDate(now - 95 * DAY)],
+      ['Figma', javaDate(now - 600 * DAY)],
+    ],
+  ));
+  files.set('Jobs/Job Seeker Preferences.csv', csv(
+    ['Locations', 'Industries', 'Company Employee Count', 'Preferred Job Types', 'Job Titles', 'Open To Recruiters', 'Dream Companies'],
+    [['London; Remote Europe', 'Design Services; Software Development', '51-200; 201-500', 'Full-time', 'Staff Product Designer; Design Systems Lead', 'Yes', 'Lumen Labs; Vela Payments']],
+  ));
+  files.set('Endorsement_Received_Info.csv', csv(
+    ['Endorsement Date', 'Skill Name', 'Endorser First Name', 'Endorser Last Name', 'Endorser Public Url', 'Endorsement Status'],
+    [
+      [slashUtcDate(now - 400 * DAY), 'Design Systems', 'Emma', 'Collins', bareUrl(emma.url), 'Accepted'],
+      [slashUtcDate(now - 400 * DAY), 'Product Design', 'Emma', 'Collins', bareUrl(emma.url), 'Accepted'],
+      [slashUtcDate(now - 395 * DAY), 'Prototyping', 'Emma', 'Collins', bareUrl(emma.url), 'Accepted'],
+      [slashUtcDate(now - 520 * DAY), 'Design Systems', 'Olivia', 'Bennett', bareUrl(olivia.url), 'Accepted'],
+      [slashUtcDate(now - 520 * DAY), 'Design Leadership', 'Olivia', 'Bennett', bareUrl(olivia.url), 'Accepted'],
+      [slashUtcDate(now - 610 * DAY), 'Design Systems', 'Marco', 'Bianchi', bareUrl(marco.url), 'Accepted'],
+      [slashUtcDate(now - 610 * DAY), 'Interaction Design', 'Marco', 'Bianchi', bareUrl(marco.url), 'Accepted'],
+      [slashUtcDate(now - 290 * DAY), 'Design Systems', 'Liam', 'Turner', bareUrl(liam.url), 'Accepted'],
+      [slashUtcDate(now - 310 * DAY), 'Figma', 'Daniel', 'Kim', bareUrl(daniel.url), 'Accepted'],
+      [slashUtcDate(now - 480 * DAY), 'Product Design', 'Nora', 'Lindqvist', bareUrl(nora.url), 'Accepted'],
+    ],
+  ));
+  files.set('Endorsement_Given_Info.csv', csv(
+    ['Endorsement Date', 'Skill Name', 'Endorsee First Name', 'Endorsee Last Name', 'Endorsee Public Url', 'Endorsement Status'],
+    [
+      [slashUtcDate(now - 390 * DAY), 'Product Strategy', 'Emma', 'Collins', bareUrl(emma.url), 'Accepted'],
+      [slashUtcDate(now - 515 * DAY), 'Design Direction', 'Olivia', 'Bennett', bareUrl(olivia.url), 'Accepted'],
+      [slashUtcDate(now - 690 * DAY), 'Distributed Systems', 'Ravi', 'Sharma', bareUrl(ravi.url), 'Accepted'],
+    ],
+  ));
+  files.set('Recommendations_Received.csv', csv(
+    ['First Name', 'Last Name', 'Company', 'Job Title', 'Text', 'Creation Date', 'Status'],
+    [
+      ['Emma', 'Collins', 'Lumen Labs', 'Product Manager', 'Working with Alex made every product review sharper and calmer.', invDate(now - 360 * DAY), 'VISIBLE'],
+      ['Olivia', 'Bennett', 'Pinecrest Media', 'Design Director', 'Alex led our design system overhaul with clarity and craft.', invDate(now - 740 * DAY), 'VISIBLE'],
+    ],
+  ));
+  files.set('Recommendations_Given.csv', csv(
+    ['First Name', 'Last Name', 'Company', 'Job Title', 'Text', 'Creation Date', 'Status'],
+    [['Marco', 'Bianchi', 'Kestrel Bank', 'Senior Product Designer', 'Marco brings rigor and empathy to complex financial workflows.', invDate(now - 900 * DAY), 'VISIBLE']],
+  ));
+  files.set('Skills.csv', csv(
+    ['Name'],
+    [
+      ['Design Systems'], ['Product Design'], ['Interaction Design'], ['Design Tokens'], ['Prototyping'],
+      ['Figma'], ['User Research'], ['Web Accessibility'], ['Information Architecture'], ['Design Leadership'],
+    ],
+  ));
+
+  // Complete-export Credibility, Inferences, Ad Targeting & Activity CSVs
+  files.set('Inferred Credibility Scores.csv', csv(
+    ['ScoreType', 'Topic', 'Category', 'Range', d0, d1, d2, d3],
+    credibilityRows,
+  ));
+  files.set('Inferences_about_you.csv', csv(
+    ['Category', 'Type of inference', 'Description', 'Inference'],
+    [
+      ['Usage and activity', 'Active weekly contributor', 'Inferred from posting and commenting cadence', 'True'],
+      ['Career', 'Design systems decision-maker', 'Inferred from role scope and network graph', 'True'],
+      ['Job seeking', 'Receptive to senior IC outreach', 'Inferred from career preferences', 'True'],
+      ['Inferred personal characteristics', 'Inferred demographic', 'Structurally excluded personal category', 'Excluded'],
+    ],
+  ));
+  files.set('Ad_Targeting.csv', csv(
+    ['Member Age', 'Member Gender', 'Years of Experience', 'Company Size', 'Job Seniorities', 'Job Functions', 'Job Titles', 'Job Titles', 'Company Industries', 'High Value Audience Segments', 'Standard Audience Segments', 'Member Traits', 'Member Skills'],
+    [[
+      '25 to 34',
+      'Excluded',
+      '8 to 12 years',
+      '51-200 employees',
+      'Senior; Staff',
+      'Design; Product Management; Engineering',
+      'Senior Product Designer; Product Designer',
+      'Design Systems Lead; Staff Product Designer',
+      'Design Services; Software Development; Financial Technology',
+      'B2B Software Evaluators; Design Tool Decision Makers; Senior Product IC',
+      'SaaS Early Adopters; Tech Conference Attendees; Remote Europe Tech',
+      'Desktop App User; Frequent Commenter; Creator Mode',
+      'Design Systems; Product Design; Interaction Design; Figma; Prototyping; Design Tokens; Accessibility; UX Research; CSS; HTML; React; Design Leadership; Wireframing; Usability Testing; Component Libraries; Visual Design',
+    ]],
+  ));
+  files.set('Shares_1049201.csv', csv(['Date', 'ShareLink', 'ShareCommentary', 'SharedUrl', 'MediaUrl', 'Visibility'], shareRows));
+  files.set('Comments_1049201.csv', csv(['Date', 'Link', 'Message'], commentRows));
+  files.set('Reactions_1049201.csv', csv(['Date', 'Type', 'Link'], reactionRows));
+  files.set('InstantReposts_1049201.csv', csv(['Date', 'Link'], Array.from({ length: 6 }, (_, idx) => [msgDate(now - (idx * 45 + 10) * DAY), `https://www.linkedin.com/feed/update/urn:li:activity:7400${idx}`])));
+  files.set('Votes_1049201.csv', csv(['Date', 'Link', 'OptionText'], Array.from({ length: 5 }, (_, idx) => [msgDate(now - (idx * 50 + 12) * DAY), `https://www.linkedin.com/feed/update/urn:li:activity:7500${idx}`, 'Option A'])));
+  files.set('Saved_Items_1049201.csv', csv(['CreatedTime', 'SavedItem'], Array.from({ length: 11 }, (_, idx) => [slashUtcDate(now - (idx * 25 + 4) * DAY), `https://www.linkedin.com/feed/update/urn:li:activity:7600${idx}`])));
+  files.set('Member_Follows_1049201.csv', csv(['Date', 'Status', 'FullName'], [
+    ...Array.from({ length: 16 }, (_, idx) => [javaDate(now - (idx * 30 + 5) * DAY), 'Active', `Creator ${idx + 1}`]),
+    ...Array.from({ length: 3 }, (_, idx) => [javaDate(now - (idx * 90 + 40) * DAY), 'Unfollowed', `Past Creator ${idx + 1}`]),
+  ]));
+  files.set('Hashtag_Follows_1049201.csv', csv(['HashTag', 'State', 'LastModifiedTime'], [
+    ['designsystems', 'FOLLOW', slashUtcDate(now - 300 * DAY)],
+    ['productdesign', 'FOLLOW', slashUtcDate(now - 280 * DAY)],
+    ['accessibility', 'FOLLOW', slashUtcDate(now - 260 * DAY)],
+    ['uxresearch', 'FOLLOW', slashUtcDate(now - 240 * DAY)],
+    ['designtokens', 'FOLLOW', slashUtcDate(now - 200 * DAY)],
+    ['frontend', 'FOLLOW', slashUtcDate(now - 180 * DAY)],
+  ]));
+  files.set('SearchQueries.csv', csv(['Time', 'Search Query'], searchRows));
+
+  // Synthetic quarantined files present in Complete exports (counted in coverage, never decompressed or read)
+  files.set('Email Addresses.csv', csv(['Email Address', 'Confirmed', 'Primary', 'Updated On'], [['alex.fictional@example.invalid', 'Yes', 'Yes', '10/14/22, 9:00 AM']]));
+  files.set('Logins.csv', csv(['Login Date', 'IP Address', 'User Agent', 'Login Type'], [[slashUtcDate(now - DAY), '198.51.100.42', 'Mozilla/5.0', 'WEB']]));
+
   return files;
 }
 

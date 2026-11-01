@@ -56,6 +56,7 @@ export function rightRail(actions, { insights = true, extra = null } = {}) {
         h('li.insight', h('span.insight__dot'), h('span', h('b', fmt(s.activeThisYear)), ' people you had a two-way conversation with this year')),
         h('li.insight', h('span.insight__dot'), h('span', h('b', fmt(s.conversations)), ' conversations analyzed, ', h('b', fmt(s.messages)), ' messages')),
       ),
+      h('a.card__footer', { href: '#/insights' }, 'Explore all insights', icon('arrowRight', 16)),
     ));
     if (r.topCompanies.length) {
       blocks.push(card(

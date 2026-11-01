@@ -443,8 +443,8 @@ try {
   await sleep(150);
 
   const persistDump = await evaluate(DUMP_STORAGE_EXPR);
-  check('opted-in report saved with v2 schema and 90-day expiresAt', Boolean(
-    persistDump.idb.report && persistDump.idb.report.version === 2 && persistDump.idb.report.expiresAt > Date.now() + 80 * 86400000,
+  check('opted-in report saved with v3 schema and 90-day expiresAt', Boolean(
+    persistDump.idb.report && persistDump.idb.report.version === 3 && persistDump.idb.report.expiresAt > Date.now() + 80 * 86400000,
   ));
   for (const [kind, secret] of Object.entries(CANARIES)) {
     check(`zero "${kind}" canary secret in IndexedDB or localStorage even with persistence ON`, !persistDump.serialized.includes(secret));
@@ -838,12 +838,46 @@ try {
       return { ok: true, hs };
     })()`;
     const headingFailures = [];
-    for (const r of ['home', 'replies', 'recruiters', 'reconnect', 'companies']) {
+    for (const r of ['home', 'replies', 'recruiters', 'reconnect', 'companies', 'insights']) {
       await evaluate(`location.hash = '#/${r}'`);
       await sleep(80);
       const hr = await evaluate(headingAuditExpr);
       if (!hr.ok) headingFailures.push(`${r}: [${hr.hs.join(',')}]`);
     }
+
+    // Verify #/insights Complete-archive Algorithm Mirror UI, zero mobile overflow, and Followed Companies handoff
+    const insightsMobileLayout = await evaluate(mobileLayoutCheckExpr(390));
+    const insightsRenderedOk = await evaluate(`(() => {
+      const txt = document.querySelector('main')?.textContent || '';
+      const pillars = document.querySelectorAll('.ins-pillar').length;
+      const bars = document.querySelectorAll('svg.ins-bar').length;
+      return txt.includes('Complete archive detected')
+        && txt.includes('Design Systems')
+        && txt.includes('Active weekly contributor')
+        && txt.includes('sent invitations still unaccepted')
+        && pillars >= 2
+        && bars >= 8;
+    })()`);
+    check('mobile 390x844 #/insights renders Complete archive credibility, 5-pillar specialties, persona, and activity with zero overflow', insightsMobileLayout.ok && insightsRenderedOk, insightsMobileLayout.issues?.join(', ') || '');
+
+    await clickText('main button', 'View followed companies');
+    await waitFor('location.hash === "#/companies"');
+    await sleep(80);
+    const followedFilterOk = await evaluate(`(() => {
+      const activePill = document.querySelector('.pills .pill[aria-pressed="true"]')?.textContent || '';
+      const rows = [...document.querySelectorAll('main button.company-row')];
+      return activePill.includes('Following') && rows.length === 5 && rows.some((r) => r.textContent.includes('Lumen Labs'));
+    })()`);
+    check('#/insights "View followed companies" activates Following filter on #/companies', followedFilterOk);
+
+    await clickText('main button.company-row', 'Lumen Labs');
+    await sleep(80);
+    const socialBadgesOk = await evaluate(`(() => {
+      const firstRow = document.querySelector('main .row')?.textContent || '';
+      return firstRow.includes('Emma Collins') && firstRow.includes('Recommended you') && firstRow.includes('Endorsed you');
+    })()`);
+    check('#/companies company detail ranks social-capital warmest connection first with trust badges', socialBadgesOk);
+
     const appFooterTargetsOk = await evaluate(`(() => {
       const links = [...document.querySelectorAll('.site-footer a')];
       return links.length >= 2 && links.every((a) => a.getBoundingClientRect().height >= 24);
@@ -854,7 +888,7 @@ try {
     await waitFor('document.querySelector(".hero__title")');
     const welcomeHr = await evaluate(headingAuditExpr);
     if (!welcomeHr.ok) headingFailures.push(`welcome: [${welcomeHr.hs.join(',')}]`);
-    check('live DOM sequential heading hierarchy (single h1 first, zero skipped levels) across Welcome + all 5 app routes', headingFailures.length === 0, headingFailures.join(' | '));
+    check('live DOM sequential heading hierarchy (single h1 first, zero skipped levels) across Welcome + all 6 app routes', headingFailures.length === 0, headingFailures.join(' | '));
 
     const hydratedSeoAndTargets = await evaluate(`(() => {
       const hasSkip = Boolean(document.querySelector('a.skip-link[href="#main"]'));

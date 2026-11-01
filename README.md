@@ -4,8 +4,15 @@
 
 1. **Replies** — 1:1 conversations where the other person wrote last or asked an unanswered question (filtering out short sign-offs, group chats, sales pitches, and threads answered in a newer conversation).
 2. **Recruiters** — Inbound recruiter outreach across messages, InMails, and invitation notes, deduplicated per person with editable reply templates.
-3. **Reconnect** — Five connections per week with real two-way message history who have gone quiet for over six months.
-4. **Companies** — Connections grouped by employer and ranked by two-way conversation warmth for warm introductions.
+3. **Reconnect** — Five connections per week with real two-way message history and social-capital trust signals who have gone quiet for over six months.
+4. **Companies** — Connections grouped by normalized employer (plus a **Following** filter for followed/dream target companies) and ranked by two-way conversation warmth, recommendations, endorsements, and shared-employer alumni history.
+
+When you open LinkedIn's full 24–48h **Complete Data Archive** (or full Basic archive), Reply Debt also unlocks **`#/insights` (Archive & Algorithm Insights)**:
+- **Topic Credibility & 5-Pillar Authority (`Inferred Credibility Scores.csv`):** Decodes your discrete Notability Tier (`0–4`), continuous Notability Score (`0–5`), 5-pillar specialty grades (`Role & scope`, `Tenure`, `Content output`, `Credentials`, `Validation`), and `100+` normalized feed topic scores (`1.00–4.00`) with historical trend deltas.
+- **Algorithmic Inferences & Ad Persona (`Inferences_about_you.csv`, `Ad_Targeting.csv`, `Skills.csv`):** Reveals how LinkedIn's ad and ranking engines classify your seniority, job functions, and high-value buyer segments while structurally excluding personal demographic categories (`Member Age`, `Member Gender`, `Inferred personal characteristics`).
+- **Social Capital & Outbound Invitation Hygiene:** Surfaces endorsement/recommendation depth, shared-company alumni counts, followed companies already inside your 1st-degree network, and stale unaccepted outgoing invitations (`> 90 days`).
+- **Aggregate Activity Footprint:** Summarizes post, comment, poll-vote, repost, search, hashtag, and 7-type reaction counts (`LIKE`, `PRAISE`, `APPRECIATION`, `EMPATHY`, `INTEREST`, `ENTERTAINMENT`, `MAYBE`) while dropping raw post commentary, comment prose, and search query strings.
+- **Quarantined Sensitive Files (Never Decompressed or Read):** `Email Addresses.csv`, `PhoneNumbers.csv`, `Whatsapp Phone Numbers.csv`, `Receipts_v2.csv`, `Verifications.csv`, `Logins.csv`, `Security Challenges.csv`, `Registration.csv`, and `Notes.csv` are automatically quarantined and never read into memory.
 
 > **Independent open-source tool · Not affiliated with LinkedIn.**
 > Reply Debt is not affiliated with, endorsed by, or sponsored by LinkedIn Corporation.
@@ -71,10 +78,10 @@ assets/
     theme-init.js           Pre-paint theme and frame-embed guard
     main.js                 Boot, pre-open transparency gate, routing, modals, drag-drop
     core/                   Streaming ZIP reader, RFC 4180 CSV parser, 21-locale dates, identity, model, IndexedDB store
-    analyze/                Recruiter, reply-debt, reconnect, company warmth, and template engines
+    analyze/                Recruiter, reply-debt, reconnect, company warmth, archive insights, and template engines
     app/                    Worker client, pipeline, session/storage state, and archive handoff
     ui/                     DOM builder (h), createElementNS SVG icons, portaled menus, modals, composer
-    pages/                  Welcome, Home, Replies, Recruiters, Reconnect, Companies, Rails
+    pages/                  Welcome, Home, Replies, Recruiters, Reconnect, Companies, Insights, Rails
     worker/                 Web Worker entry point
 tools/                      Zero-dependency bundler, static server, dist builder, fixture/OG generators, E2E runner
 tests/                      Node test suite and synthetic sample fixture
